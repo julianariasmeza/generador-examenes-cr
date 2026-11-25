@@ -1,1 +1,109 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Exam STEM CR 2.0</title><link rel="stylesheet" href="style.css"><style id="pageStyle"></style></head><body><header><strong>Exam STEM CR</strong><span>Generador de pruebas escritas · 2.0</span></header><main><section class="panel"><h2>Configuración del examen</h2><div id="fields" class="grid"></div><h3>Distribución de ítems</h3><div id="counts" class="grid"></div><p id="total"></p><button id="generate">Generar examen</button><button id="apply">Actualizar encabezado y papel</button><button id="save">Guardar examen</button><button id="load">Recuperar examen</button><p id="status" role="status"></p></section><section class="panel"><div class="actions"><button id="print">Imprimir / PDF</button><button id="solution">Mostrar soluciones</button><button id="latex">Editar / descargar LaTeX</button><select id="addType"><option value="sel">Selección única</option><option value="id">Identificación</option><option value="short">Respuesta corta</option><option value="dev">Desarrollo</option></select><button id="add">Agregar pregunta</button></div><p class="hint" id="actual"></p><p class="hint">Editá cada pregunta, sus respuestas y rúbrica. La impresión oculta los controles.</p><article id="exam"></article></section></main><dialog id="dialog"><form id="editForm"><h2>Editar pregunta</h2><input type="hidden" id="editIndex"><label>Enunciado<textarea id="e_q" required></textarea></label><label>Alternativas (una por línea; 3 o 4 para selección)<textarea id="e_options"></textarea></label><label>Respuesta correcta<input id="e_r" required></label><label>Solución / procedimiento<textarea id="e_s"></textarea></label><div class="grid"><label>Puntos<input id="e_p" type="number" min="0.1" step="any"></label><label>Espacio (cm)<input id="e_space" type="number" min="0" max="20" step="0.5"></label><label>Opciones<select id="e_layout"><option>Vertical</option><option>Horizontal</option></select></label><label>Marcador<select id="e_marker"><option>Paréntesis</option><option>Letras</option><option>Casillas</option></select></label><label>Respuesta<select id="e_mode"><option>Línea</option><option>Recuadro</option><option>Operación / respuesta</option></select></label></div><label>Incisos (uno por línea)<textarea id="e_parts"></textarea></label><label>Rúbrica (una fila por línea: puntos | indicador)<textarea id="e_rubric"></textarea></label><label>Figura (PNG, JPEG o WebP)<input type="file" id="e_image" accept="image/png,image/jpeg,image/webp"></label><label class="check"><input type="checkbox" id="e_remove">Quitar figura</label><label class="check"><input type="checkbox" id="e_break">Salto de página antes del ítem</label><button type="submit">Aplicar cambios</button><button type="button" onclick="document.getElementById('dialog').close()">Cancelar</button></form></dialog><dialog id="texDialog"><h2>Código LaTeX editable</h2><p>Compilá el archivo en Overleaf o TeX Live. Las imágenes y la maquetación de rúbricas requieren ajustes manuales.</p><textarea id="texSource" rows="20"></textarea><button id="downloadTex">Descargar .tex</button><button onclick="document.getElementById('texDialog').close()">Cerrar</button></dialog><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Generador de pruebas escritas de ciencias y matemática: configure, edite, imprima o exporte a LaTeX.">
+  <title>Exam STEM CR 2.0 | Generador de pruebas escritas</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231f2a44'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle' fill='%23ffffff' font-family='Arial,sans-serif' font-weight='700'%3EEx%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <!-- Solo para elementos nuevos; va antes de #pageStyle para que ese bloque siga mandando en la impresión -->
+  <style id="a11yStyle">
+    .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .skip-link{position:absolute;left:-9999px;top:0;z-index:1000;padding:.7rem 1rem;background:#fff;color:#111;font-weight:600;border:2px solid #111}
+    .skip-link:focus{left:0}
+    :focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+    .noscript-msg{margin:1rem;padding:1rem;border:1px solid currentColor;border-radius:8px}
+    @media print{.skip-link,.noscript-msg{display:none!important}}
+  </style>
+  <style id="pageStyle"></style>
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+
+  <header>
+    <strong>Exam STEM CR</strong>
+    <span>Generador de pruebas escritas · 2.0</span>
+  </header>
+
+  <main id="contenido">
+    <noscript><p class="noscript-msg">Esta herramienta necesita JavaScript activado para generar y editar exámenes.</p></noscript>
+
+    <section class="panel" aria-labelledby="tConfig">
+      <h2 id="tConfig">Configuración del examen</h2>
+      <div id="fields" class="grid"></div>
+
+      <h3>Distribución de ítems</h3>
+      <div id="counts" class="grid"></div>
+      <p id="total" aria-live="polite"></p>
+
+      <div class="actions">
+        <button type="button" id="generate">Generar examen</button>
+        <button type="button" id="apply">Actualizar encabezado y papel</button>
+        <button type="button" id="save">Guardar examen</button>
+        <button type="button" id="load">Recuperar examen</button>
+      </div>
+      <p id="status" role="status"></p>
+    </section>
+
+    <section class="panel" aria-labelledby="tExamen">
+      <h2 id="tExamen" class="sr-only">Examen</h2>
+      <div class="actions">
+        <button type="button" id="print">Imprimir / PDF</button>
+        <button type="button" id="solution">Mostrar soluciones</button>
+        <button type="button" id="latex">Editar / descargar LaTeX</button>
+        <label class="sr-only" for="addType">Tipo de pregunta nueva</label>
+        <select id="addType">
+          <option value="sel">Selección única</option>
+          <option value="id">Identificación</option>
+          <option value="short">Respuesta corta</option>
+          <option value="dev">Desarrollo</option>
+        </select>
+        <button type="button" id="add">Agregar pregunta</button>
+      </div>
+      <p class="hint" id="actual"></p>
+      <p class="hint">Editá cada pregunta, sus respuestas y rúbrica. La impresión oculta los controles.</p>
+      <article id="exam" aria-label="Vista previa del examen"></article>
+    </section>
+  </main>
+
+  <dialog id="dialog" aria-labelledby="tEditar">
+    <form id="editForm">
+      <h2 id="tEditar">Editar pregunta</h2>
+      <input type="hidden" id="editIndex">
+
+      <label>Enunciado<textarea id="e_q" required></textarea></label>
+      <label>Alternativas (una por línea; 3 o 4 para selección)<textarea id="e_options"></textarea></label>
+      <label>Respuesta correcta<input id="e_r" required></label>
+      <label>Solución / procedimiento<textarea id="e_s"></textarea></label>
+
+      <div class="grid">
+        <label>Puntos<input id="e_p" type="number" min="0.1" step="any"></label>
+        <label>Espacio (cm)<input id="e_space" type="number" min="0" max="20" step="0.5"></label>
+        <label>Opciones<select id="e_layout"><option>Vertical</option><option>Horizontal</option></select></label>
+        <label>Marcador<select id="e_marker"><option>Paréntesis</option><option>Letras</option><option>Casillas</option></select></label>
+        <label>Respuesta<select id="e_mode"><option>Línea</option><option>Recuadro</option><option>Operación / respuesta</option></select></label>
+      </div>
+
+      <label>Incisos (uno por línea)<textarea id="e_parts"></textarea></label>
+      <label>Rúbrica (una fila por línea: puntos | indicador)<textarea id="e_rubric"></textarea></label>
+      <label>Figura (PNG, JPEG o WebP)<input type="file" id="e_image" accept="image/png,image/jpeg,image/webp"></label>
+      <label class="check"><input type="checkbox" id="e_remove">Quitar figura</label>
+      <label class="check"><input type="checkbox" id="e_break">Salto de página antes del ítem</label>
+
+      <button type="submit">Aplicar cambios</button>
+      <button type="button" onclick="document.getElementById('dialog').close()">Cancelar</button>
+    </form>
+  </dialog>
+
+  <dialog id="texDialog" aria-labelledby="tTex">
+    <h2 id="tTex">Código LaTeX editable</h2>
+    <p>Compilá el archivo en Overleaf o TeX Live. Las imágenes y la maquetación de rúbricas requieren ajustes manuales.</p>
+    <textarea id="texSource" rows="20" spellcheck="false" aria-label="Código LaTeX"></textarea>
+    <button type="button" id="downloadTex">Descargar .tex</button>
+    <button type="button" onclick="document.getElementById('texDialog').close()">Cerrar</button>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
