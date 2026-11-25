@@ -313,6 +313,11 @@ $('exam').onclick = e => {
 $('generate').onclick = generate;
 $('print').onclick = () => {
   if (!items.length) return say('Genere un examen antes de imprimir.');
+  /* El navegador usa el título de la página como nombre sugerido del PDF. */
+  const anterior = document.title;
+  document.title = 'Examen ' + [config.test, config.subject, config.level].filter(Boolean).join(' - ');
+  const restaurar = () => { document.title = anterior; window.removeEventListener('afterprint', restaurar); };
+  window.addEventListener('afterprint', restaurar);
   window.print();
 };
 $('solution').onclick = () => { show = !show; render(!dirty); };
