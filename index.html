@@ -1,109 +1,115 @@
-<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Generador de pruebas escritas de ciencias y matemática: configure, edite, imprima o exporte a LaTeX.">
-  <title>Exam STEM CR 2.0 | Generador de pruebas escritas</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231f2a44'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle' fill='%23ffffff' font-family='Arial,sans-serif' font-weight='700'%3EEx%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css">
-  <!-- Solo para elementos nuevos; va antes de #pageStyle para que ese bloque siga mandando en la impresión -->
-  <style id="a11yStyle">
-    .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-    .skip-link{position:absolute;left:-9999px;top:0;z-index:1000;padding:.7rem 1rem;background:#fff;color:#111;font-weight:600;border:2px solid #111}
-    .skip-link:focus{left:0}
-    :focus-visible{outline:3px solid #2563eb;outline-offset:2px}
-    .noscript-msg{margin:1rem;padding:1rem;border:1px solid currentColor;border-radius:8px}
-    @media print{.skip-link,.noscript-msg{display:none!important}}
-  </style>
-  <style id="pageStyle"></style>
-</head>
-<body>
-  <a class="skip-link" href="#contenido">Ir al contenido</a>
+/* Interfaz de Exam STEM CR 2.0.
+   Se carga DESPUÉS de style.css. Solo afecta a la pantalla; el examen impreso
+   conserva las reglas de style.css y el bloque @page generado por app.js. */
 
-  <header>
-    <strong>Exam STEM CR</strong>
-    <span>Generador de pruebas escritas · 2.0</span>
-  </header>
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip-link{position:absolute;left:-9999px;top:0;z-index:1000;padding:.7rem 1rem;background:#fff;color:#111;font-weight:600;border:2px solid #111}
+.skip-link:focus{left:0}
 
-  <main id="contenido">
-    <noscript><p class="noscript-msg">Esta herramienta necesita JavaScript activado para generar y editar exámenes.</p></noscript>
+@media screen{
+:root{
+  --ui-bg:#eef1f6;--ui-panel:#fff;--ui-ink:#1b2437;--ui-muted:#566176;--ui-line:#d6dce8;
+  --ui-field:#fff;--ui-soft:#eef3fb;--ui-accent:#1f4fa3;--ui-accent-ink:#fff;--ui-focus:#2563eb;
+  --ui-brand:#14213d;--ui-ok:#14683d;--ui-radius:10px;
+  --ui-font:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--ui-bg:#0f1524;--ui-panel:#171f33;--ui-ink:#e7ebf5;--ui-muted:#a2adc4;--ui-line:#2c3752;
+    --ui-field:#0f1524;--ui-soft:#1d2845;--ui-accent:#8db3ff;--ui-accent-ink:#0b1630;--ui-focus:#8db3ff;--ui-ok:#6bd39b}
+}
+body{margin:0;background:var(--ui-bg);color:var(--ui-ink);font:15px/1.5 var(--ui-font)}
+:focus-visible{outline:3px solid var(--ui-focus);outline-offset:2px}
 
-    <section class="panel" aria-labelledby="tConfig">
-      <h2 id="tConfig">Configuración del examen</h2>
-      <div id="fields" class="grid"></div>
+/* Encabezado */
+.app-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.8rem 1.5rem;background:var(--ui-brand);color:#fff;border-bottom:3px solid var(--ui-accent)}
+.brand{display:flex;align-items:center;gap:.8rem}
+.logo{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:#fff;color:var(--ui-brand);font:700 18px Georgia,"Times New Roman",serif}
+.brand-text strong{display:block;font-size:1.1rem;letter-spacing:.01em;color:#fff}
+.brand-text span{display:block;font-size:.8rem;color:#c3cde3}
+.chip{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;border:1px solid #4a5a82;border-radius:99px;padding:.25rem .7rem;color:#d7def0}
 
-      <h3>Distribución de ítems</h3>
-      <div id="counts" class="grid"></div>
-      <p id="total" aria-live="polite"></p>
+/* Estructura */
+.workspace{display:grid;grid-template-columns:minmax(300px,390px) minmax(0,1fr);gap:1.25rem;align-items:start;max-width:1560px;margin:0 auto;padding:1.25rem 1.5rem 2.5rem}
+.panel{background:var(--ui-panel);border:1px solid var(--ui-line);border-radius:var(--ui-radius);padding:1.2rem 1.25rem;margin:0;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.config{position:sticky;top:1rem;max-height:calc(100vh - 2rem);overflow:auto}
+.panel-head{display:flex;align-items:center;gap:.7rem;margin-bottom:.4rem}
+.panel-head h2{margin:0;font-size:1.15rem}
+.step{display:grid;place-items:center;width:1.7rem;height:1.7rem;border-radius:50%;background:var(--ui-accent);color:var(--ui-accent-ink);font-weight:700;font-size:.85rem;flex-shrink:0}
+.config h3{margin:1.2rem 0 .6rem;padding-bottom:.35rem;border-bottom:1px solid var(--ui-line);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ui-muted)}
 
-      <div class="actions">
-        <button type="button" id="generate">Generar examen</button>
-        <button type="button" id="apply">Actualizar encabezado y papel</button>
-        <button type="button" id="save">Guardar examen</button>
-        <button type="button" id="load">Recuperar examen</button>
-      </div>
-      <p id="status" role="status"></p>
-    </section>
+/* Formularios */
+.config *,dialog *,.toolbar *{box-sizing:border-box}
+.config,.preview{min-width:0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem .8rem}
+#fields>label:nth-child(1),#fields>label:nth-child(9),#fields>label:nth-child(17),#fields>label:nth-child(18){grid-column:1/-1}
+.config label,dialog label{display:grid;gap:.3rem;font-size:.8rem;font-weight:600;color:var(--ui-muted)}
+label.check{display:flex;align-items:center;gap:.5rem;font-weight:500;font-size:.9rem;color:var(--ui-ink)}
+.config input:not([type=checkbox]),.config select,
+dialog input:not([type=checkbox]):not([type=file]),dialog select,dialog textarea,.toolbar select{
+  width:100%;padding:.5rem .6rem;border:1px solid var(--ui-line);border-radius:7px;background:var(--ui-field);color:var(--ui-ink);font:inherit;font-weight:400}
+.toolbar select{width:auto}
+dialog textarea{min-height:4.5rem;resize:vertical}
+.config input:focus,.config select:focus,dialog input:focus,dialog select:focus,dialog textarea:focus{border-color:var(--ui-focus)}
 
-    <section class="panel" aria-labelledby="tExamen">
-      <h2 id="tExamen" class="sr-only">Examen</h2>
-      <div class="actions">
-        <button type="button" id="print">Imprimir / PDF</button>
-        <button type="button" id="solution">Mostrar soluciones</button>
-        <button type="button" id="latex">Editar / descargar LaTeX</button>
-        <label class="sr-only" for="addType">Tipo de pregunta nueva</label>
-        <select id="addType">
-          <option value="sel">Selección única</option>
-          <option value="id">Identificación</option>
-          <option value="short">Respuesta corta</option>
-          <option value="dev">Desarrollo</option>
-        </select>
-        <button type="button" id="add">Agregar pregunta</button>
-      </div>
-      <p class="hint" id="actual"></p>
-      <p class="hint">Editá cada pregunta, sus respuestas y rúbrica. La impresión oculta los controles.</p>
-      <article id="exam" aria-label="Vista previa del examen"></article>
-    </section>
-  </main>
+/* Botones */
+main button,dialog button{font:inherit;font-weight:600;font-size:.88rem;padding:.5rem .95rem;border:1px solid var(--ui-line);border-radius:7px;background:var(--ui-panel);color:var(--ui-ink);cursor:pointer;transition:background .15s,border-color .15s}
+main button:hover,dialog button:hover{background:var(--ui-soft);border-color:var(--ui-accent)}
+main button.primary,dialog button.primary{background:var(--ui-accent);border-color:var(--ui-accent);color:var(--ui-accent-ink)}
+main button.primary:hover,dialog button.primary:hover{filter:brightness(1.08)}
+.config-actions{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:1.1rem}
+.config-actions .primary{grid-column:1/-1;padding:.7rem 1rem;font-size:.95rem}
 
-  <dialog id="dialog" aria-labelledby="tEditar">
-    <form id="editForm">
-      <h2 id="tEditar">Editar pregunta</h2>
-      <input type="hidden" id="editIndex">
+/* Totales y estado */
+#total{margin:.9rem 0 0;padding:.55rem .8rem;border-radius:7px;background:var(--ui-soft);font-weight:700;font-size:.9rem}
+#status{min-height:1.4em;margin:.8rem 0 0;font-size:.85rem;color:var(--ui-ok);font-weight:600}
+.hint{margin:.3rem 0;font-size:.85rem;color:var(--ui-muted)}
 
-      <label>Enunciado<textarea id="e_q" required></textarea></label>
-      <label>Alternativas (una por línea; 3 o 4 para selección)<textarea id="e_options"></textarea></label>
-      <label>Respuesta correcta<input id="e_r" required></label>
-      <label>Solución / procedimiento<textarea id="e_s"></textarea></label>
+/* Barra de herramientas */
+.toolbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:.6rem 1.2rem;align-items:center;margin:.4rem 0 .6rem;padding:.6rem 0;background:var(--ui-panel);border-bottom:1px solid var(--ui-line)}
+.toolbar .group{display:flex;gap:.4rem;align-items:center}
+.toolbar .group+.group{padding-left:1.2rem;border-left:1px solid var(--ui-line)}
 
-      <div class="grid">
-        <label>Puntos<input id="e_p" type="number" min="0.1" step="any"></label>
-        <label>Espacio (cm)<input id="e_space" type="number" min="0" max="20" step="0.5"></label>
-        <label>Opciones<select id="e_layout"><option>Vertical</option><option>Horizontal</option></select></label>
-        <label>Marcador<select id="e_marker"><option>Paréntesis</option><option>Letras</option><option>Casillas</option></select></label>
-        <label>Respuesta<select id="e_mode"><option>Línea</option><option>Recuadro</option><option>Operación / respuesta</option></select></label>
-      </div>
+/* Hoja de examen */
+#exam{background:#fff;color:#111;max-width:920px;min-height:14rem;margin:1rem auto 0;padding:2.2rem 2.4rem;border:1px solid var(--ui-line);border-radius:4px;box-shadow:0 1px 2px rgba(16,24,40,.06),0 10px 28px rgba(16,24,40,.08)}
+#exam:empty::before{content:"Aún no hay un examen. Complete los datos y pulse «Generar examen».";display:block;padding:3.5rem 1rem;text-align:center;color:#5b6578;font-style:italic}
+#exam:not(.show) .answer{display:none}
+#exam.show .answer{display:block;margin-top:.4rem;padding:.4rem .7rem;border-left:3px solid #6d28d9;background:#f5f0ff;color:#3b1d7a;font-size:.9em}
+#exam .question{position:relative}
+#exam .tools{display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:.35rem;opacity:.45;transition:opacity .15s}
+#exam .question:hover .tools,#exam .question:focus-within .tools{opacity:1}
+#exam .tools button{padding:.2rem .55rem;font-size:.75rem;border-radius:5px;background:#fff;color:#1b2437}
 
-      <label>Incisos (uno por línea)<textarea id="e_parts"></textarea></label>
-      <label>Rúbrica (una fila por línea: puntos | indicador)<textarea id="e_rubric"></textarea></label>
-      <label>Figura (PNG, JPEG o WebP)<input type="file" id="e_image" accept="image/png,image/jpeg,image/webp"></label>
-      <label class="check"><input type="checkbox" id="e_remove">Quitar figura</label>
-      <label class="check"><input type="checkbox" id="e_break">Salto de página antes del ítem</label>
+/* Diálogos */
+dialog{width:min(780px,94vw);max-height:92vh;padding:0;overflow:auto;border:0;border-radius:12px;background:var(--ui-panel);color:var(--ui-ink);box-shadow:0 24px 70px rgba(10,16,32,.45)}
+dialog::backdrop{background:rgba(12,18,36,.6)}
+#editForm{display:grid;gap:.9rem;padding:1.4rem 1.5rem}
+#texDialog{padding:1.4rem 1.5rem}
+dialog h2{margin:0 0 .3rem;font-size:1.2rem}
+#dialog .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+#texSource{width:100%;min-height:48vh;padding:.7rem;border:1px solid var(--ui-line);border-radius:7px;background:var(--ui-field);color:var(--ui-ink);font:.8rem/1.45 ui-monospace,SFMono-Regular,Consolas,Menlo,monospace}
+.dialog-actions{display:flex;justify-content:flex-end;gap:.5rem;margin-top:.6rem}
+#editForm .dialog-actions{position:sticky;bottom:0;padding:.7rem 0 .1rem;background:var(--ui-panel);border-top:1px solid var(--ui-line)}
+.noscript-msg{grid-column:1/-1;margin:0;padding:1rem;border:1px solid currentColor;border-radius:8px}
 
-      <button type="submit">Aplicar cambios</button>
-      <button type="button" onclick="document.getElementById('dialog').close()">Cancelar</button>
-    </form>
-  </dialog>
+@media (max-width:1000px){
+  .workspace{grid-template-columns:1fr;padding:1rem}
+  .config{position:static;max-height:none}
+  #exam{padding:1.2rem}
+  .toolbar .group+.group{padding-left:0;border-left:0}
+  #dialog .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  .chip{display:none}
+  .app-header{padding:.7rem 1rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+}
 
-  <dialog id="texDialog" aria-labelledby="tTex">
-    <h2 id="tTex">Código LaTeX editable</h2>
-    <p>Compilá el archivo en Overleaf o TeX Live. Las imágenes y la maquetación de rúbricas requieren ajustes manuales.</p>
-    <textarea id="texSource" rows="20" spellcheck="false" aria-label="Código LaTeX"></textarea>
-    <button type="button" id="downloadTex">Descargar .tex</button>
-    <button type="button" onclick="document.getElementById('texDialog').close()">Cerrar</button>
-  </dialog>
-
-  <script src="app.js"></script>
-</body>
-</html>
+/* Impresión: solo el examen */
+@media print{
+  .skip-link,.app-header,.config,.toolbar,.hint,dialog,.noscript-msg,#status,#actual,.panel-head,#exam .tools{display:none!important}
+  body{background:#fff}
+  .workspace{display:block;max-width:none;margin:0;padding:0}
+  .panel,.preview{margin:0;padding:0;border:0;border-radius:0;box-shadow:none;background:none}
+  #exam{max-width:none;min-height:0;margin:0;padding:0;border:0;border-radius:0;box-shadow:none}
+}
