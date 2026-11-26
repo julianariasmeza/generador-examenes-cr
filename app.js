@@ -272,6 +272,43 @@ function render(clean) {
     const n = i + 1;
     e.insertAdjacentHTML('beforeend', `<div class="question ${z.break ? 'pagebreak' : ''}"><div class="tools"><button type="button" data-edit="${i}" aria-label="Editar pregunta ${n}">Editar</button><button type="button" data-move="${i},-1" aria-label="Subir pregunta ${n}">↑</button><button type="button" data-move="${i},1" aria-label="Bajar pregunta ${n}">↓</button><button type="button" data-regen="${i}" aria-label="Regenerar pregunta ${n}">Regenerar</button><button type="button" data-del="${i}" aria-label="Eliminar pregunta ${n}">Eliminar</button></div><div>${n}. ${esc(z.q)}${z.k === 'sel' ? '' : z.k === 'corr' ? ` (Valor: ${fmt(points(z))} puntos; ${fmt(z.p)} por acierto)` : ` (${fmt(points(z))} pts)`}</div>${figureHTML(z, n)}${body}${rubric}<div class="answer">Respuesta: ${esc(z.r)}<br>${esc(z.s)}</div></div>`);
   });
+
+  // Mantener encabezados junto a su primera pregunta.
+  const children = Array.from(e.children);
+  let pendingHeadings = [];
+
+  for (const node of children) {
+
+    if (node.matches('.sectiontitle, .specific, .exam-topic')) {
+      pendingHeadings.push(node);
+      continue;
+    }
+
+    if (node.matches('.question') && pendingHeadings.length) {
+
+      const group = document.createElement('div');
+      group.className = 'exam-question-group';
+
+      if (node.classList.contains('pagebreak')) {
+        group.classList.add('pagebreak');
+        node.classList.remove('pagebreak');
+      }
+
+      pendingHeadings[0].before(group);
+
+      for (const heading of pendingHeadings) {
+        group.appendChild(heading);
+      }
+
+      group.appendChild(node);
+
+      pendingHeadings = [];
+      continue;
+    }
+
+    pendingHeadings = [];
+  }
+
   e.classList.toggle('show', show);
   $('solution').textContent = show ? 'Ocultar soluciones' : 'Mostrar soluciones';
   $('actual').textContent = `Puntaje actual: ${fmt(total())} puntos`;

@@ -146,6 +146,34 @@ async function test(name, engine) {
 
     console.log(name + ' | Numeracion romana: OK');
 
+    const grouping = await page.evaluate(() => {
+
+      const headings = [
+        ...document.querySelectorAll(
+          '#exam .sectiontitle, #exam .specific, #exam .exam-topic'
+        )
+      ];
+
+      return headings.length > 0 && headings.every(h => {
+
+        const group = h.closest('.exam-question-group');
+
+        return group &&
+          group.querySelector('.question') !== null;
+
+      });
+
+    });
+
+    assert.ok(
+      grouping,
+      'Hay encabezados separados de sus ejercicios'
+    );
+
+    console.log(name + ' | Agrupacion de encabezados: OK');
+
+
+
     // Varias figuras
 
     await page.locator(

@@ -462,3 +462,139 @@
     display: none !important;
   }
 }
+
+/* Exam STEM CR 2.8.1.1 - Paginacion */
+
+.exam-question-group {
+  display: block;
+  min-width: 0;
+}
+
+@media print {
+
+  #exam .exam-question-group {
+    display: block;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  #exam .exam-question-group.pagebreak {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  #exam .sectiontitle,
+  #exam .specific,
+  #exam .exam-topic {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  #exam .question,
+  #exam .correspondence-table,
+  #exam .rubric,
+  #exam .exam-figure {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  #exam thead {
+    display: table-header-group;
+  }
+
+  #exam tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  #exam .question {
+    orphans: 3;
+    widows: 3;
+  }
+
+}
+
+/* Exam STEM CR 2.8.1.1 - Menu matematico */
+
+@media screen {
+
+  #mathDialog.stem-floating-dialog[open] {
+    overflow: visible !important;
+  }
+
+  #mathDialog .ML__menu,
+  #mathDialog .ML__menu-container {
+    overflow: visible;
+  }
+
+  .ML__menu,
+  .ML__menu-container {
+    z-index: 100001 !important;
+    max-width: calc(100vw - 24px);
+    box-sizing: border-box;
+  }
+
+  .ML__menu {
+    max-height: 65vh;
+    overflow-y: auto;
+  }
+
+  .ML__keyboard {
+    z-index: 10000 !important;
+  }
+
+}
+
+/* Ajuste del espacio disponible en el editor matematico */
+
+@media screen {
+
+  #mathDialog.stem-floating-dialog[open] {
+    overflow: visible !important;
+    max-height: 62vh;
+  }
+
+  #mathDialog .math-editor {
+    box-sizing: border-box;
+    min-width: 0;
+    max-height: 62vh;
+    gap: .65rem;
+    padding: 1rem;
+  }
+
+  #mathDialog .math-buttons {
+    gap: .3rem;
+  }
+
+  #mathDialog .math-buttons button {
+    min-height: 32px;
+  }
+
+  #mathDialog #mathLatex {
+    min-height: 48px;
+    max-height: 90px;
+    overflow-y: auto;
+  }
+
+  #mathDialog .dialog-actions {
+    position: static;
+  }
+
+}
+
+@media screen and (max-height: 700px),
+       screen and (max-width: 600px) {
+
+  #mathDialog.stem-floating-dialog[open] {
+    max-height: 75dvh;
+    bottom: 15vh !important;
+    overflow-y: auto !important;
+  }
+
+  #mathDialog .math-editor {
+    max-height: none;
+    padding: .8rem;
+    gap: .5rem;
+  }
+
+}
