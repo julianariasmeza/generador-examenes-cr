@@ -1,0 +1,252 @@
+/* Exam STEM CR - Interfaz adaptable */
+
+@media screen {
+
+  .panel, .grid, .toolbar, .toolbar .group {
+    min-width: 0;
+  }
+
+  input, select, textarea {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .section-card-heading strong {
+    overflow-wrap: anywhere;
+  }
+
+  button:disabled {
+    opacity: .5;
+    cursor: default;
+  }
+
+}
+
+@media screen and (max-width: 1000px) {
+
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .config {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .toolbar {
+    position: static;
+  }
+
+  .toolbar .group {
+    flex-wrap: wrap;
+  }
+
+  .tools {
+    opacity: 1;
+  }
+
+}
+
+@media screen and (max-width: 600px) {
+
+  .workspace {
+    padding: .65rem;
+    gap: .8rem;
+  }
+
+  .panel {
+    padding: .85rem;
+    border-radius: 10px;
+  }
+
+  .app-header {
+    padding: .75rem;
+  }
+
+  .brand-text strong {
+    font-size: 1rem;
+  }
+
+  .brand-text span {
+    font-size: .72rem;
+  }
+
+  .grid,
+  #dialog .grid,
+  .config-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  label {
+    font-size: .85rem;
+  }
+
+  input, select, textarea {
+    font-size: 16px;
+    min-height: 44px;
+  }
+
+  input[type="checkbox"] {
+    min-height: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  button {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  .toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .5rem;
+  }
+
+  .toolbar .group {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    padding: 0;
+    border: 0;
+  }
+
+  .toolbar select,
+  .toolbar button {
+    width: 100%;
+  }
+
+  .section-card-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .section-card-actions button {
+    min-height: 44px;
+    font-size: .8rem;
+  }
+
+  .section-card-heading {
+    flex-wrap: wrap;
+  }
+
+  #exam {
+    padding: .8rem;
+    margin-top: .7rem;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  #exam .institution {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #exam .figure {
+    max-width: 100%;
+    height: auto;
+  }
+
+  #exam .tools {
+    justify-content: flex-start;
+  }
+
+  #exam .tools button {
+    min-height: 36px;
+  }
+
+  #exam .correspondence-table {
+    font-size: .8em;
+  }
+
+  #exam .correspondence-table td,
+  #exam .correspondence-table th {
+    padding: 4px;
+  }
+
+  dialog {
+    max-width: 96vw;
+    max-height: 92dvh;
+  }
+
+  #editForm,
+  #sectionForm,
+  #texDialog {
+    padding: 1rem;
+  }
+
+  .dialog-actions {
+    flex-wrap: wrap;
+  }
+
+  .dialog-actions button {
+    flex: 1 1 auto;
+  }
+
+  #chemistryDialog {
+    width: 96vw;
+    padding: .65rem;
+  }
+
+  #chemistryFrame {
+    height: 55dvh;
+    min-height: 300px;
+  }
+
+  #chemistryDialog .chemistry-import {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+}
+
+/* Navegacion rapida para dispositivos moviles */
+
+.mobile-nav {
+  display: none;
+}
+
+@media screen and (max-width: 1000px) {
+
+  .mobile-nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .4rem;
+    padding: .5rem;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .mobile-nav a {
+    display: grid;
+    place-items: center;
+    min-height: 44px;
+    padding: .4rem;
+    text-decoration: none;
+    text-align: center;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--soft);
+    border-radius: 7px;
+  }
+
+  #tConfig,
+  #sectionManager,
+  #tExamen {
+    scroll-margin-top: 80px;
+  }
+
+}
+
+@media print {
+
+  .mobile-nav {
+    display: none !important;
+  }
+
+}
+
