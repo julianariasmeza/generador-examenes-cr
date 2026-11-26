@@ -9,6 +9,31 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314213d'/%3E%3Ctext x='32' y='43' font-size='30' text-anchor='middle' fill='%23ffffff' font-family='Georgia,serif' font-weight='700'%3EEx%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
   <style id="pageStyle"></style>
+  <!-- MathLive: editor visual de fórmulas -->
+<script defer
+  src="https://cdn.jsdelivr.net/npm/mathlive@0.104.0/dist/mathlive.min.js">
+</script>
+
+<!-- MathJax: visualización matemática -->
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['\\(', '\\)']],
+      displayMath: [['\\[', '\\]']],
+      packages: {'[+]': ['mhchem']}
+    },
+    loader: {
+      load: ['[tex]/mhchem']
+    },
+    svg: {
+      fontCache: 'local'
+    }
+  };
+</script>
+
+<script defer
+  src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js">
+</script>
 </head>
 <body>
   <a class="skip-link" href="#contenido">Ir al contenido</a>
@@ -122,6 +147,7 @@
     </div>
   </dialog>
 
+  <script src="math-editor.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

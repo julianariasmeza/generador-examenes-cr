@@ -150,3 +150,107 @@ dialog h2{margin:0 0 .3rem;font-size:1.2rem}
   .rubric,.question,.institution{break-inside:avoid}
   .blocked{print-color-adjust:exact;-webkit-print-color-adjust:exact}
 }
+
+/* =====================================================
+   Exam STEM CR 2.1
+   Editor visual de fórmulas
+   ===================================================== */
+
+#mathDialog {
+  width: min(700px, 95vw);
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.math-editor {
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.math-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+.math-buttons button {
+  min-height: 36px;
+  padding: .4rem .7rem;
+  font-size: .85rem;
+}
+
+math-field {
+  display: block;
+  width: 100%;
+  min-height: 85px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  color: #14213d;
+  font-size: 1.6rem;
+  --caret-color: #2563eb;
+  --selection-background-color: #dbeafe;
+}
+
+math-field:focus-within {
+  border-color: var(--focus);
+}
+
+.formula-trigger {
+  justify-self: start;
+  width: auto;
+  padding: .3rem .65rem;
+  font-size: .78rem;
+  background: var(--soft);
+  color: var(--accent);
+}
+
+#mathLatex {
+  font-family: Consolas, Menlo, monospace;
+  font-size: .85rem;
+}
+
+#exam mjx-container {
+  max-width: 100%;
+  color: inherit;
+}
+
+#exam mjx-container[display="true"] {
+  margin: .7em 0 !important;
+}
+
+#exam .answer {
+  white-space: pre-wrap;
+}
+
+#exam .options span {
+  min-width: 0;
+}
+
+@media screen and (max-width: 600px) {
+
+  .math-editor {
+    padding: 1rem;
+  }
+
+  math-field {
+    font-size: 1.3rem;
+  }
+
+}
+
+@media print {
+
+  .formula-trigger,
+  #mathDialog {
+    display: none !important;
+  }
+
+  #exam mjx-container {
+    break-inside: avoid;
+  }
+
+}
+

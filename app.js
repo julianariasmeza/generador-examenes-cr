@@ -201,6 +201,7 @@ function render(clean) {
   dirty = !clean && items.length > 0;
   if (!items.length) { $('exam').innerHTML = ''; return; }
   const c = config, e = $('exam');
+  window.MathJax?.typesetClear?.([e]);
   e.style.fontSize = c.font + 'pt';
   const sz = [...sizes[c.paper]];
   if (c.orientation === 'Horizontal') sz.reverse();
@@ -236,6 +237,7 @@ function render(clean) {
   e.classList.toggle('show', show);
   $('solution').textContent = show ? 'Ocultar soluciones' : 'Mostrar soluciones';
   $('actual').textContent = `Puntaje actual: ${fmt(total())} puntos`;
+  window.STEMMath.typeset(e);
 }
 
 /* ---------- Edición de preguntas ---------- */
@@ -371,7 +373,7 @@ $('load').onclick = () => {
 window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 
 /* ---------- LaTeX ---------- */
-const tex = s => String(s ?? '')
+const texPlain = s => String(s ?? '')
   .replace(/[\\{}%$#&_~^]/g, c => ({ '\\': '\\textbackslash{}', '{': '\\{', '}': '\\}', '%': '\\%', '$': '\\$', '#': '\\#', '&': '\\&', '_': '\\_', '~': '\\textasciitilde{}', '^': '\\textasciicircum{}' }[c]))
   .replace(/[₀₁₂₃₄₅₆₇₈₉]+/g, m => '\\textsubscript{' + [...m].map(c => '₀₁₂₃₄₅₆₇₈₉'.indexOf(c)).join('') + '}')
   .replace(/²/g, '\\textsuperscript{2}').replace(/³/g, '\\textsuperscript{3}')
@@ -380,10 +382,12 @@ const tex = s => String(s ?? '')
   .replace(/μ/g, '\\ensuremath{\\mu}').replace(/θ/g, '\\ensuremath{\\theta}')
   .replace(/°/g, '\\textdegree{}').replace(/−/g, '-');
 
+const tex = s => window.STEMMath.exportTex(s, texPlain);
+
 function latex() {
   const c = config, sz = [...sizes[c.paper]];
   if (c.orientation === 'Horizontal') sz.reverse();
-  let out = `\\documentclass{article}\n\\usepackage[utf8]{inputenc}\n\\usepackage[T1]{fontenc}\n\\usepackage[spanish]{babel}\n\\usepackage{helvet,xcolor,tabularx,tcolorbox}\n\\renewcommand{\\familydefault}{\\sfdefault}\n\\usepackage[paperwidth=${sz[0]}in,paperheight=${sz[1]}in,margin=${c.margin}cm]{geometry}\n\\setlength{\\parindent}{0pt}\n\\begin{document}\n\\fontsize{${c.font}}{${(Number(c.font) * 1.2).toFixed(1)}}\\selectfont\n\\begin{tcolorbox}[colback=white,colframe=black,arc=3mm]\n${tex(c.school)}\\\\ ${tex(c.subject)} -- ${tex(c.level)} -- ${tex(c.test)} -- ${tex(c.period)}\\\\ Docente: ${tex(c.teacher)}\\\\ Fecha: ${tex(c.date)} -- Tiempo: ${tex(c.duration)} min\\\\ Calificación: \\rule{1cm}{.4pt} -- Puntos obtenidos: \\rule{1cm}{.4pt} -- Puntaje total: ${fmt(total())} -- Valor: ${tex(c.weight)}\\%\\\\ \\% obtenido: \\rule{1cm}{.4pt}\n\\end{tcolorbox}\nNombre: \\hrulefill\\quad Sección: \\rule{1cm}{.4pt}\\par Firma del encargado: \\hrulefill\\quad Cédula: \\hrulefill\n\\section*{Instrucciones generales} ${tex(c.instructions)}\n`;
+  let out = `\\documentclass{article}\n\\usepackage[utf8]{inputenc}\n\\usepackage[T1]{fontenc}\n\\usepackage[spanish]{babel}\n\\usepackage{helvet,xcolor,tabularx,tcolorbox}\n\\usepackage{amsmath,amssymb,mathtools}\n\\usepackage{graphicx}\n\\usepackage{tikz,pgfplots}\n\\usepackage[version=4]{mhchem}\n\\usepackage{siunitx}\n\\usepackage{enumitem,multicol}\n\\pgfplotsset{compat=1.18}\n\\sisetup{output-decimal-marker={,}}\n\\renewcommand{\\familydefault}{\\sfdefault}\n\\usepackage[paperwidth=${sz[0]}in,paperheight=${sz[1]}in,margin=${c.margin}cm]{geometry}\n\\setlength{\\parindent}{0pt}\n\\begin{document}\n\\fontsize{${c.font}}{${(Number(c.font) * 1.2).toFixed(1)}}\\selectfont\n\\begin{tcolorbox}[colback=white,colframe=black,arc=3mm]\n${tex(c.school)}\\\\ ${tex(c.subject)} -- ${tex(c.level)} -- ${tex(c.test)} -- ${tex(c.period)}\\\\ Docente: ${tex(c.teacher)}\\\\ Fecha: ${tex(c.date)} -- Tiempo: ${tex(c.duration)} min\\\\ Calificación: \\rule{1cm}{.4pt} -- Puntos obtenidos: \\rule{1cm}{.4pt} -- Puntaje total: ${fmt(total())} -- Valor: ${tex(c.weight)}\\%\\\\ \\% obtenido: \\rule{1cm}{.4pt}\n\\end{tcolorbox}\nNombre: \\hrulefill\\quad Sección: \\rule{1cm}{.4pt}\\par Firma del encargado: \\hrulefill\\quad Cédula: \\hrulefill\n\\section*{Instrucciones generales} ${tex(c.instructions)}\n`;
   let last = '';
   items.forEach((z, i) => {
     if (z.break) out += '\\newpage\n';
