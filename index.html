@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Generador de pruebas escritas de ciencias y matemática: configure, edite, imprima o exporte a LaTeX.">
   <meta name="color-scheme" content="light dark">
-  <title>Exam STEM CR 2.6.1 | Generador de pruebas escritas</title>
+  <title>Exam STEM CR 2.6.2 | Generador de pruebas escritas</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314213d'/%3E%3Ctext x='32' y='43' font-size='30' text-anchor='middle' fill='%23ffffff' font-family='Georgia,serif' font-weight='700'%3EEx%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css?v=1795667903">
+  <link rel="stylesheet" href="style.css?v=1795668342">
   <style id="pageStyle"></style>
   <!-- MathLive: editor visual de fórmulas -->
 <script defer
@@ -44,7 +44,7 @@
       <span class="logo" aria-hidden="true">Ex</span>
       <div class="brand-text">
         <strong>Exam STEM CR</strong>
-        <span>Generador de pruebas escritas · 2.6.1</span>
+        <span>Generador de pruebas escritas · 2.6.2</span>
       </div>
     </div>
     <span class="chip">Educación diversificada</span>
@@ -62,7 +62,7 @@
       <h3>Datos generales</h3>
       <div id="fields" class="grid"></div>
 
-      <h3>Distribución de ítems</h3>
+      <h3>Generación automática</h3>
       <div id="counts" class="grid"></div>
       <p id="total" aria-live="polite"></p>
 
@@ -72,7 +72,27 @@
         <button type="button" id="save">Guardar examen</button>
         <button type="button" id="load">Recuperar examen</button>
       </div>
+
+      <h3>Constructor libre de secciones</h3>
+
+      <button type="button" id="blankExam" class="blank-exam">
+        Crear examen en blanco
+      </button>
+
+      <div class="section-add">
+        <label>Tipo de sección
+          <select id="sectionType"></select>
+        </label>
+
+        <button type="button" id="addSection">
+          + Agregar sección
+        </button>
+      </div>
+
+      <div id="sectionManager"></div>
+
       <p id="status" role="status"></p>
+
     </section>
 
     <section class="panel preview" aria-labelledby="tExamen">
@@ -89,6 +109,9 @@
             <option value="corr">Correspondencia</option>
             <option value="id">Identificación</option>
             <option value="short">Respuesta corta</option>
+            <option value="restricted">Respuesta restringida</option>
+            <option value="exercise">Resolución de ejercicios</option>
+            <option value="problem">Resolución de problemas</option>
             <option value="dev">Desarrollo</option>
           </select>
           <button type="button" id="add">Agregar pregunta</button>
@@ -139,6 +162,34 @@
     </form>
   </dialog>
 
+
+  <dialog id="sectionDialog">
+    <form id="sectionForm">
+      <h2>Editar sección</h2>
+
+      <input type="hidden" id="sectionEditId">
+
+      <label>Título
+        <input id="sectionTitle" required>
+      </label>
+
+      <label>Instrucciones específicas
+        <textarea id="sectionInstructions" rows="5"></textarea>
+      </label>
+
+      <div class="dialog-actions">
+        <button type="button"
+          onclick="document.getElementById('sectionDialog').close()">
+          Cancelar
+        </button>
+
+        <button type="submit" class="primary">
+          Guardar sección
+        </button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="texDialog" aria-labelledby="tTex">
     <h2 id="tTex">Código LaTeX editable</h2>
     <p>Compilá el archivo en Overleaf o TeX Live. Las imágenes y la maquetación de rúbricas requieren ajustes manuales.</p>
@@ -154,7 +205,8 @@
   <script src="keyboard-fix.js?v=1795665645"></script>
   <script src="graph-editor.js?v=1795665645"></script>
   <script src="correspondence.js?v=1795667903"></script>
-  <script src="app.js?v=1795667903"></script>
+  <script src="sections.js?v=1795668342"></script>
+  <script src="app.js?v=1795668342"></script>
   <script src="physics-editor.js?v=1795666735"></script>
 </body>
 </html>

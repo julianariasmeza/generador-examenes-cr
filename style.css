@@ -627,3 +627,90 @@ body {
   }
 
 }
+
+/* ==========================================
+   Exam STEM CR 2.6.2
+   Constructor libre de secciones
+   ========================================== */
+
+.blank-exam {
+  width: 100%;
+  padding: .8rem;
+  margin-bottom: 1rem;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.section-add {
+  display: grid;
+  gap: .6rem;
+  margin-bottom: 1rem;
+}
+
+#sectionManager {
+  display: grid;
+  gap: .75rem;
+}
+
+.section-card {
+  padding: .8rem;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.section-card-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: .5rem;
+  font-size: .9rem;
+}
+
+.section-card-heading span {
+  white-space: nowrap;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.section-card-meta {
+  font-size: .75rem;
+  color: var(--muted);
+  margin: .35rem 0 .6rem;
+}
+
+.section-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem;
+  margin-top: .4rem;
+}
+
+.section-card-actions button {
+  padding: .35rem .5rem;
+  font-size: .75rem;
+}
+
+.section-card-actions button:disabled {
+  opacity: .35;
+  cursor: default;
+}
+
+#sectionDialog {
+  width: min(650px, 94vw);
+}
+
+#sectionForm {
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+@media print {
+  #sectionManager,
+  #sectionDialog,
+  .section-add,
+  .blank-exam {
+    display: none !important;
+  }
+}

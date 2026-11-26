@@ -25,9 +25,12 @@ const fields = [
 const types = [
   ['sel', 'Selección de respuesta', 10, 1],
   ['corr', 'Correspondencia', 0, 1],
-  ['id', 'Identificación', 5, 1],
-  ['short', 'Respuesta corta', 3, 2],
-  ['dev', 'Desarrollo', 2, 5]
+  ['id', 'Identificación', 0, 1],
+  ['short', 'Respuesta corta', 0, 2],
+  ['restricted', 'Respuesta restringida', 0, 3],
+  ['exercise', 'Resolución de ejercicios', 0, 5],
+  ['problem', 'Resolución de problemas', 0, 5],
+  ['dev', 'Desarrollo', 0, 5]
 ];
 const topics = {
   'Matemática': ['Ecuaciones lineales', 'Geometría: áreas', 'Funciones lineales'],
@@ -162,14 +165,15 @@ function make(k, p, topic) {
   const options = shuffle([z.r, ...z.options.filter(o => o !== z.r).slice(0, n - 1)]);
   return {
     ...z, k, p, topic, options,
-    space: k === 'dev' ? 4 : 1, layout: config.layout, marker: config.marker, break: false,
-    mode: k === 'short' ? 'Línea' : 'Recuadro', parts: [],
-    rubric: k === 'dev' ? [{ label: 'Resuelve correctamente el ejercicio y presenta el procedimiento.', p }] : [],
+    space: ['dev','exercise','problem'].includes(k) ? 4 : k === 'restricted' ? 2 : 1, layout: config.layout, marker: config.marker, break: false,
+    mode: ['short','id'].includes(k) ? 'Línea' : 'Recuadro', parts: [],
+    rubric: ['dev','exercise','problem','restricted'].includes(k) && Number.isInteger(p) && p <= 10 ? [{ label: 'Resuelve correctamente el ejercicio y presenta el procedimiento.', p }] : [],
     image: ''
   };
 }
 
 function generate() {
+  if (dirty && !confirm('¿Generar otro examen? Los cambios sin guardar se perderán.')) return;
   if (types.some(([k]) => !Number.isInteger(num(k)) || num(k) < 0 || num(k) > 100 || !Number.isFinite(num(k + 'p')) || num(k + 'p') <= 0)
     || !types.some(([k]) => num(k) > 0) || num('font') < 8 || num('font') > 18 || num('margin') < 0.5 || num('margin') > 4) {
     say('Revisá cantidades, puntajes, márgenes y tamaño de letra.');
@@ -192,6 +196,7 @@ function generate() {
     }
   }
   items = next;
+  examSections();
   render();
   say('Examen generado. Revisá preguntas y clave.');
 }
@@ -202,8 +207,14 @@ const label = k => types.find(t => t[0] === k)[1];
 const mark = (z, j) => z.marker === 'Letras' ? String.fromCharCode(97 + j) + '.' : z.marker === 'Casillas' ? '□' : '(   )';
 
 function render(clean) {
-  dirty = !clean && items.length > 0;
-  if (!items.length) { $('exam').innerHTML = ''; return; }
+  dirty = !clean && Boolean(config.paper);
+  if (!config.paper) {
+    $('exam').innerHTML = '';
+    renderSectionManager();
+    return;
+  }
+  examSections();
+  renderSectionManager();
   const c = config, e = $('exam');
   window.MathJax?.typesetClear?.([e]);
   e.style.fontSize = c.font + 'pt';
@@ -213,12 +224,19 @@ function render(clean) {
 
   e.innerHTML = `<div class="institution"><div>${esc(c.school)}<br>Materia: ${esc(c.subject)}<br>Profesor: ${esc(c.teacher)}<br>Tiempo probable: ${esc(c.duration)} minutos</div><div>Departamento de ${c.subject === 'Matemática' ? 'Matemática' : 'Ciencias'}<br>${esc(c.level)} nivel<br>${esc(c.test)} – ${esc(c.period)}<br>Fecha: ${esc(c.date)}</div><div>Calificación: ______ &nbsp; % obt.: ______<br>Puntos obtenidos: ______<br><b>Puntaje total: ${fmt(total())} puntos</b><br>Porcentaje: ${esc(c.weight)} %</div></div><div class="student">Nombre: __________________________________ Sección: ______<br>Firma del encargado(a): __________________ Cédula: __________</div><h4 class="center">INSTRUCCIONES GENERALES</h4><div class="instructions">${esc(c.instructions)}</div>`;
 
-  const especifica = { corr: 'Complete las correspondencias según las indicaciones.', sel: 'Marque con una X la opción correcta.', id: 'Identifique lo solicitado.', short: 'Escriba la respuesta en el espacio indicado.', dev: 'Muestre todos los procedimientos y las unidades correspondientes.' };
+  const especifica = { corr: 'Complete las correspondencias según las indicaciones.', sel: 'Marque con una X la opción correcta.', id: 'Identifique lo solicitado.', short: 'Escriba la respuesta en el espacio indicado.', restricted: 'Responda únicamente lo que se solicita.', exercise: 'Resuelva los ejercicios y muestre los procedimientos.', problem: 'Analice cada problema, plantee la solución y justifique su respuesta.', dev: 'Muestre todos los procedimientos y las unidades correspondientes.' };
   let last = '';
   items.forEach((z, i) => {
-    if (last !== z.k) {
-      e.insertAdjacentHTML('beforeend', `<h3 class="sectiontitle">${esc(label(z.k).toUpperCase())}<span>VALOR ${fmt(section(z.k))} PUNTOS</span></h3><p class="specific">${esc(config['inst_' + z.k] || especifica[z.k])}</p>`);
-      last = z.k;
+    const sec = sectionInfo(z);
+
+    if (last !== sec.id) {
+      e.insertAdjacentHTML('beforeend',
+        `<h3 class="sectiontitle">
+          ${esc(sec.title.toUpperCase())}
+          <span>VALOR ${fmt(sectionPoints(sec.id))} PUNTOS</span>
+        </h3>
+        <p class="specific">${esc(sec.instructions)}</p>`);
+      last = sec.id;
     }
     const body = z.k === 'corr'
       ? window.STEMCorrespondence.html(z, esc, show)
@@ -314,13 +332,13 @@ $('exam').onclick = e => {
   if (d.del !== undefined && confirm('¿Eliminar pregunta?')) { items.splice(+d.del, 1); render(); }
   if (d.move) {
     const [i, v] = d.move.split(',').map(Number), j = i + v;
-    if (items[j] && items[i].k === items[j].k) { [items[i], items[j]] = [items[j], items[i]]; render(); }
+    if (items[j] && items[i].sid === items[j].sid) { [items[i], items[j]] = [items[j], items[i]]; render(); }
   }
   if (d.regen !== undefined) {
     const i = +d.regen, z = items[i];
     for (let t = 0; t < 200; t++) {
       const n = make(z.k, z.p, z.topic);
-      if (z.k === 'corr' || !items.some(x => x.q === n.q)) { items[i] = n; render(); return; }
+      if (z.k === 'corr' || !items.some(x => x.q === n.q)) { n.sid = z.sid; items[i] = n; render(); return; }
     }
     say('No hay otra pregunta distinta disponible.');
   }
@@ -339,23 +357,23 @@ $('print').onclick = () => {
 };
 $('solution').onclick = () => { show = !show; render(!dirty); };
 $('add').onclick = () => {
-  if (!items.length) return say('Genere un examen antes de agregar preguntas.');
-  const k = $('addType').value, z = make(k, 1, config.topic);
-  if (k !== 'corr') {
-  z.q = 'Escriba el enunciado aquí'; z.r = 'Respuesta'; z.s = 'Procedimiento';
-  z.options = ['Respuesta', 'Alternativa 2', 'Alternativa 3', ...(config.alternatives === '4' ? ['Alternativa 4'] : [])];
+  if (!config.paper) {
+    blankExam();
+    if (!config.paper) return;
   }
-  let i = items.findLastIndex(x => x.k === k);
-  if (i < 0) {
-    items.push(z);
-    items.sort((a, b) => types.findIndex(t => t[0] === a.k) - types.findIndex(t => t[0] === b.k));
-    i = items.indexOf(z);
-  } else items.splice(++i, 0, z);
-  render();
-  edit(i);
+
+  const k = $('addType').value;
+  let sec = examSections().find(s => s.k === k);
+
+  if (!sec) {
+    sec = newSection(k);
+    examSections().push(sec);
+  }
+
+  addSectionQuestion(sec.id);
 };
 $('apply').onclick = () => {
-  if (!items.length) return say('Genere un examen antes de actualizar el encabezado.');
+  if (!config.paper) return say('Creá primero un examen.');
   if (num('font') < 8 || num('font') > 18 || num('margin') < 0.5 || num('margin') > 4) { say('Revisá letra y margen.'); return; }
   for (const [k] of fields) if (!['subject', 'topic', 'alternatives', 'layout', 'marker'].includes(k)) config[k] = val(k);
   render();
@@ -382,6 +400,8 @@ $('load').onclick = () => {
     refresh();
     Object.entries(x.form).forEach(([k, v]) => { if ($(k)) $(k).value = v; });
     items = x.items; config = x.config;
+    examSections();
+    sortSections();
     totals();
     render(true);
     say('Examen recuperado.');
@@ -408,7 +428,13 @@ function latex() {
   let last = '';
   items.forEach((z, i) => {
     if (z.break) out += '\\newpage\n';
-    if (last !== z.k) { out += `\\section*{${tex(label(z.k))} -- Valor ${fmt(section(z.k))} puntos}\n`; last = z.k; }
+    const sec = sectionInfo(z);
+
+    if (last !== sec.id) {
+      out += `\\section*{${tex(sec.title)} -- Valor ${fmt(sectionPoints(sec.id))} puntos}\n`;
+      out += `${tex(sec.instructions)}\\par\n`;
+      last = sec.id;
+    }
     out += `\\textbf{${i + 1}.} ${tex(z.q)}${z.k === 'sel' ? '' : z.k === 'corr' ? ` (Valor: ${fmt(points(z))} puntos; ${fmt(z.p)} por acierto)` : ` (${fmt(points(z))} pts)`}\\par\n`;
     if (z.image) out += '\\textit{Figura: insertar imagen manualmente.}\\par\n';
     if (z.k === 'corr') {
@@ -443,3 +469,5 @@ $('downloadTex').onclick = () => {
   a.href = u; a.download = 'examen.tex'; a.click();
   setTimeout(() => URL.revokeObjectURL(u), 1000);
 };
+
+initSections();
