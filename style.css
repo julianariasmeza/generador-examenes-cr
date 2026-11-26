@@ -455,3 +455,69 @@ math-field:focus-within {
   }
 
 }
+
+/* STEM - Correccion de capas flotantes */
+
+:root {
+  --keyboard-zindex: 10000;
+}
+
+body {
+  --keyboard-zindex: 10000;
+}
+
+.stem-floating-dialog[open] {
+  position: fixed !important;
+  inset: 0 !important;
+  margin: auto !important;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 0 0 200vmax rgba(0,0,0,.55);
+}
+
+#mathDialog.stem-floating-dialog[open] {
+  width: min(900px, 94vw);
+  max-height: 62vh;
+  bottom: 30vh !important;
+  overflow-y: auto;
+  z-index: 110 !important;
+}
+
+#mathDialog .science-grid {
+  max-height: 120px;
+}
+
+#mathDialog #visualMath {
+  min-height: 65px;
+  background: white;
+  color: #111827;
+}
+
+.ML__keyboard {
+  z-index: 10000 !important;
+}
+
+.ML__keyboard-container {
+  z-index: 10000 !important;
+}
+
+.ML__menu {
+  z-index: 10001 !important;
+}
+
+.ML__menu-container {
+  z-index: 10001 !important;
+}
+
+@media screen and (max-height: 700px) {
+
+  #mathDialog.stem-floating-dialog[open] {
+    max-height: 55vh;
+    bottom: 35vh !important;
+  }
+
+  #mathDialog .science-grid {
+    max-height: 85px;
+  }
+
+}

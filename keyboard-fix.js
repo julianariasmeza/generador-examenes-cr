@@ -2,47 +2,90 @@
 
 (() => {
 
+  function configureDialog(dialog, layer) {
+
+    if (!dialog || dialog.dataset.stemFixed) return;
+
+    dialog.dataset.stemFixed = 'true';
+    dialog.classList.add('stem-floating-dialog');
+    dialog.style.zIndex = String(layer);
+
+    dialog.showModal = function () {
+
+      if (this.open) return;
+
+      this.show();
+
+    };
+
+  }
+
   function install() {
 
-    const dialog = document.getElementById('mathDialog');
-    const mf = document.getElementById('visualMath');
+    const editor = document.getElementById('dialog');
+    const math = document.getElementById('mathDialog');
     const keyboard = window.mathVirtualKeyboard;
 
-    if (!dialog || !mf || !keyboard) return false;
+    if (!editor || !math || !keyboard) return false;
 
-    if (document.getElementById('stemKeyboardHost')) {
-      return true;
-    }
-
-    const host = document.createElement('div');
-
-    host.id = 'stemKeyboardHost';
-
-    dialog.appendChild(host);
+    configureDialog(editor, 100);
+    configureDialog(math, 110);
 
     keyboard.hide();
-    keyboard.container = host;
+    keyboard.container = document.body;
+
+    const oldHost =
+      document.getElementById('stemKeyboardHost');
+
+    if (oldHost) oldHost.remove();
 
     const observer = new MutationObserver(() => {
 
-      if (dialog.open) {
+      if (math.open) {
 
-        keyboard.container = host;
+        keyboard.container = document.body;
+        editor.inert = true;
 
       } else {
 
         keyboard.hide();
+        editor.inert = false;
 
       }
 
     });
 
-    observer.observe(dialog, {
+    observer.observe(math, {
       attributes: true,
       attributeFilter: ['open']
     });
 
-    console.log('Teclado STEM integrado correctamente.');
+    math.addEventListener('close', () => {
+
+      keyboard.hide();
+      editor.inert = false;
+
+    });
+
+    document.addEventListener('keydown', event => {
+
+      if (event.key !== 'Escape') return;
+
+      if (math.open) {
+
+        event.preventDefault();
+        math.close();
+
+      } else if (editor.open) {
+
+        event.preventDefault();
+        editor.close();
+
+      }
+
+    });
+
+    console.log('STEM: capas de MathLive corregidas.');
 
     return true;
 
