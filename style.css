@@ -254,3 +254,91 @@ math-field:focus-within {
 
 }
 
+
+/* ==========================================
+   Exam STEM CR 2.2 - Editor científico
+   ========================================== */
+
+#mathDialog {
+  width: min(850px, 96vw);
+}
+
+#mathDialog [hidden] {
+  display: none !important;
+}
+
+#scienceTools {
+  display: grid;
+  gap: .75rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--soft);
+}
+
+#scienceTools h3 {
+  margin: 0;
+  font-size: .95rem;
+}
+
+.science-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .4rem;
+}
+
+.science-tabs button {
+  padding: .7rem .4rem;
+  font-size: .85rem;
+}
+
+.science-tabs button.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+
+.science-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .4rem;
+  max-height: 230px;
+  overflow-y: auto;
+  padding: .2rem;
+}
+
+.science-button {
+  min-height: 42px;
+  padding: .4rem;
+  font-size: .75rem;
+  overflow-wrap: anywhere;
+}
+
+#visualMath {
+  min-height: 100px;
+  font-size: 1.7rem;
+}
+
+@media screen and (max-width: 650px) {
+
+  .science-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #scienceTools {
+    padding: .6rem;
+  }
+
+  #visualMath {
+    font-size: 1.3rem;
+  }
+
+}
+
+@media print {
+
+  #scienceTools {
+    display: none !important;
+  }
+
+}
