@@ -1,0 +1,106 @@
+/* Exam STEM CR - Apartados tematicos */
+
+.topic-block {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: .8rem;
+  margin-top: .75rem;
+  min-width: 0;
+}
+
+.topic-block-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: .5rem;
+}
+
+.topic-block-heading strong {
+  overflow-wrap: anywhere;
+}
+
+.topic-block-heading span {
+  white-space: nowrap;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: .8rem;
+}
+
+.topic-block-meta {
+  color: var(--muted);
+  font-size: .8rem;
+  margin: .4rem 0;
+  overflow-wrap: anywhere;
+}
+
+.topic-block-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin-top: .6rem;
+}
+
+.topic-block-actions button {
+  font-size: .8rem;
+}
+
+.topic-add {
+  width: 100%;
+  margin-top: .75rem;
+  color: var(--accent);
+}
+
+#topicDialog {
+  width: min(650px, 94vw);
+}
+
+#topicForm {
+  display: grid;
+  gap: .85rem;
+  padding: 1.4rem;
+}
+
+.topic-warning {
+  color: #b45309;
+  font-weight: 600;
+  font-size: .8rem;
+}
+
+.exam-topic {
+  font-size: .95em;
+  margin: 1rem 0 .4rem;
+  break-after: avoid;
+}
+
+@media screen and (max-width: 600px) {
+
+  #topicForm {
+    padding: 1rem;
+  }
+
+  .topic-block-heading {
+    flex-wrap: wrap;
+  }
+
+  .topic-block-actions {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+
+  .topic-block-actions button {
+    min-height: 44px;
+  }
+
+}
+
+@media print {
+
+  #topicDialog,
+  .topic-add,
+  .topic-block-actions {
+    display: none !important;
+  }
+
+}

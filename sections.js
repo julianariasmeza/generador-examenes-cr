@@ -1,5 +1,7 @@
 'use strict';
 
+let pendingTopicQuestion = null;
+
 /* Exam STEM CR 2.6.2 */
 
 function examSections() {
@@ -59,9 +61,16 @@ function sectionPoints(id) {
 function sortSections() {
   const order = examSections().map(s => s.id);
 
-  items.sort((a, b) =>
-    order.indexOf(a.sid) - order.indexOf(b.sid)
-  );
+  migrateTopicBlocks();
+
+  items.sort((a, b) => {
+    const diff = order.indexOf(a.sid) - order.indexOf(b.sid);
+    if (diff) return diff;
+
+    const blocks = topicBlocks(sectionInfo(a));
+    return blocks.findIndex(x => x.id === a.bid) -
+      blocks.findIndex(x => x.id === b.bid);
+  });
 }
 
 function blankExam() {
@@ -101,20 +110,30 @@ function addExamSection() {
   say('Sección agregada: ' + s.title);
 }
 
-function addSectionQuestion(id, automatic = false) {
+function addSectionQuestion(id, automatic = false, bid = '') {
   const s = examSections().find(x => x.id === id);
 
   if (!s) return;
 
-  const defaults = types.find(t => t[0] === s.k);
-  const p = defaults ? defaults[3] : 1;
+  const block = topicBlocks(s).find(b => b.id === bid);
+
+  if (!block || !block.topic.trim()) {
+    openTopicDialog(id);
+    return;
+  }
+
+  if (automatic && !hasBankTopic(block.topic)) {
+    return say('Este tema todavía no tiene banco de preguntas.');
+  }
+
+  const p = block.defaultPoints;
 
   let z;
 
   if (automatic) {
     try {
       for (let i = 0; i < 200; i++) {
-        const candidate = make(s.k, p, config.topic);
+        const candidate = make(s.k, p, block.topic);
 
         if (s.k === 'corr' ||
             !items.some(x => x.q === candidate.q)) {
@@ -133,7 +152,7 @@ function addSectionQuestion(id, automatic = false) {
     z = {
       k: 'corr',
       p,
-      topic: config.topic,
+      topic: block.topic,
       q: 'Relacione los elementos de ambas columnas.',
       r: 'A, B',
       s: '',
@@ -153,7 +172,7 @@ function addSectionQuestion(id, automatic = false) {
     z = {
       k: s.k,
       p,
-      topic: config.topic,
+      topic: block.topic,
       q: 'Escriba el enunciado aquí',
       r: 'Respuesta',
       s: '',
@@ -178,6 +197,7 @@ function addSectionQuestion(id, automatic = false) {
   }
 
   z.sid = id;
+  z.bid = block.id;
 
   items.push(z);
   sortSections();
@@ -185,6 +205,7 @@ function addSectionQuestion(id, automatic = false) {
   render();
 
   if (!automatic) {
+    pendingTopicQuestion = z;
     edit(items.indexOf(z));
   }
 }
@@ -276,20 +297,28 @@ function renderSectionManager() {
           data-sid="${esc(s.id)}">Eliminar</button>
       </div>
 
-      <div class="section-card-actions">
-        <button type="button"
-          data-action="manual"
-          data-sid="${esc(s.id)}">+ Pregunta manual</button>
-
-        <button type="button"
-          data-action="automatic"
-          data-sid="${esc(s.id)}">+ Desde banco</button>
-      </div>
+      ${renderTopicBlocks(s)}
     </div>
   `).join('') || '<p class="hint">Todavía no hay secciones.</p>';
 }
 
 function initSections() {
+
+  $('dialog').addEventListener('close', () => {
+
+    if (!pendingTopicQuestion) return;
+
+    const draft = pendingTopicQuestion;
+    pendingTopicQuestion = null;
+
+    if (items.includes(draft)) {
+      items = items.filter(z => z !== draft);
+      render();
+      say('Pregunta nueva cancelada.');
+    }
+
+  });
+
   const select = $('sectionType');
 
   types.forEach(([k, name]) =>
@@ -304,14 +333,18 @@ function initSections() {
 
     if (!button) return;
 
-    const { action, sid } = button.dataset;
+    const { action, sid, bid } = button.dataset;
+
+    if (action.startsWith('topic-')) {
+      return handleTopicAction(action, sid, bid);
+    }
 
     if (action === 'edit') editExamSection(sid);
     if (action === 'up') moveExamSection(sid, -1);
     if (action === 'down') moveExamSection(sid, 1);
     if (action === 'delete') deleteExamSection(sid);
-    if (action === 'manual') addSectionQuestion(sid);
-    if (action === 'automatic') addSectionQuestion(sid, true);
+    if (action === 'manual') addSectionQuestion(sid, false, bid);
+    if (action === 'automatic') addSectionQuestion(sid, true, bid);
   };
 
   $('sectionForm').onsubmit = e => {

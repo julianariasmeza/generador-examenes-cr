@@ -51,6 +51,18 @@ async function test(name, engine) {
       await page.locator('#addSection').click();
 
       await page.locator(
+        '[data-action="topic-add"]'
+      ).first().click();
+
+      await page.locator('#topicName')
+        .fill('Ecuaciones lineales');
+
+      await page.locator(
+        '#topicForm button[type="submit"]'
+      ).click();
+
+
+      await page.locator(
         '#sectionManager [data-action="automatic"]'
       ).first().click();
 

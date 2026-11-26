@@ -157,6 +157,9 @@ $('counts').oninput = totals;
 totals();
 
 function make(k, p, topic) {
+  if (!Object.values(topics).flat().includes(topic)) {
+    throw new Error('No existe un banco para este tema.');
+  }
   if (k === 'corr') {
     return window.STEMCorrespondence.create(p, topic, question, shuffle);
   }
@@ -214,6 +217,7 @@ function render(clean) {
     return;
   }
   examSections();
+  migrateTopicBlocks();
   renderSectionManager();
   const c = config, e = $('exam');
   window.MathJax?.typesetClear?.([e]);
@@ -225,7 +229,7 @@ function render(clean) {
   e.innerHTML = `<div class="institution"><div>${esc(c.school)}<br>Materia: ${esc(c.subject)}<br>Profesor: ${esc(c.teacher)}<br>Tiempo probable: ${esc(c.duration)} minutos</div><div>Departamento de ${c.subject === 'Matemática' ? 'Matemática' : 'Ciencias'}<br>${esc(c.level)} nivel<br>${esc(c.test)} – ${esc(c.period)}<br>Fecha: ${esc(c.date)}</div><div>Calificación: ______ &nbsp; % obt.: ______<br>Puntos obtenidos: ______<br><b>Puntaje total: ${fmt(total())} puntos</b><br>Porcentaje: ${esc(c.weight)} %</div></div><div class="student">Nombre: __________________________________ Sección: ______<br>Firma del encargado(a): __________________ Cédula: __________</div><h4 class="center">INSTRUCCIONES GENERALES</h4><div class="instructions">${esc(c.instructions)}</div>`;
 
   const especifica = { corr: 'Complete las correspondencias según las indicaciones.', sel: 'Marque con una X la opción correcta.', id: 'Identifique lo solicitado.', short: 'Escriba la respuesta en el espacio indicado.', restricted: 'Responda únicamente lo que se solicita.', exercise: 'Resuelva los ejercicios y muestre los procedimientos.', problem: 'Analice cada problema, plantee la solución y justifique su respuesta.', dev: 'Muestre todos los procedimientos y las unidades correspondientes.' };
-  let last = '';
+  let last = '', lastBlock = '';
   items.forEach((z, i) => {
     const sec = sectionInfo(z);
 
@@ -238,6 +242,16 @@ function render(clean) {
         <p class="specific">${esc(sec.instructions)}</p>`);
       last = sec.id;
     }
+    const block = topicBlockInfo(z);
+
+    if (block && lastBlock !== block.id) {
+      if (block.visible) {
+        e.insertAdjacentHTML('beforeend',
+          `<h4 class="exam-topic">${esc(block.topic)}</h4>`);
+      }
+      lastBlock = block.id;
+    }
+
     const body = z.k === 'corr'
       ? window.STEMCorrespondence.html(z, esc, show)
       : z.k === 'sel'
@@ -332,13 +346,17 @@ $('exam').onclick = e => {
   if (d.del !== undefined && confirm('¿Eliminar pregunta?')) { items.splice(+d.del, 1); render(); }
   if (d.move) {
     const [i, v] = d.move.split(',').map(Number), j = i + v;
-    if (items[j] && items[i].sid === items[j].sid) { [items[i], items[j]] = [items[j], items[i]]; render(); }
+    if (items[j] && items[i].sid === items[j].sid && items[i].bid === items[j].bid) { [items[i], items[j]] = [items[j], items[i]]; render(); }
   }
   if (d.regen !== undefined) {
     const i = +d.regen, z = items[i];
     for (let t = 0; t < 200; t++) {
+      if (!hasBankTopic(z.topic)) {
+        return say('Este tema no tiene banco automático.');
+      }
+
       const n = make(z.k, z.p, z.topic);
-      if (z.k === 'corr' || !items.some(x => x.q === n.q)) { n.sid = z.sid; items[i] = n; render(); return; }
+      if (z.k === 'corr' || !items.some(x => x.q === n.q)) { n.sid = z.sid; n.bid = z.bid; items[i] = n; render(); return; }
     }
     say('No hay otra pregunta distinta disponible.');
   }
@@ -347,6 +365,15 @@ $('exam').onclick = e => {
 /* ---------- Botones principales ---------- */
 $('generate').onclick = generate;
 $('print').onclick = () => {
+  if (items.length) {
+    const errors = validateTopicBlocks();
+
+    if (errors.length) {
+      alert(errors.join('\n'));
+      return say('Revisá los apartados antes de exportar.');
+    }
+  }
+
   if (!items.length) return say('Genere un examen antes de imprimir.');
   /* El navegador usa el título de la página como nombre sugerido del PDF. */
   const anterior = document.title;
@@ -370,7 +397,15 @@ $('add').onclick = () => {
     examSections().push(sec);
   }
 
-  addSectionQuestion(sec.id);
+  const blocks = topicBlocks(sec);
+
+  if (blocks.length === 1 && blocks[0].topic) {
+    addSectionQuestion(sec.id, false, blocks[0].id);
+  } else {
+    render();
+    say('Seleccioná el apartado en el constructor.');
+    if (!blocks.length) openTopicDialog(sec.id);
+  }
 };
 $('apply').onclick = () => {
   if (!config.paper) return say('Creá primero un examen.');
@@ -425,7 +460,7 @@ function latex() {
   const c = config, sz = [...sizes[c.paper]];
   if (c.orientation === 'Horizontal') sz.reverse();
   let out = `\\documentclass{article}\n\\usepackage[utf8]{inputenc}\n\\usepackage[T1]{fontenc}\n\\usepackage[spanish]{babel}\n\\usepackage{helvet,xcolor,tabularx,tcolorbox}\n\\usepackage{amsmath,amssymb,mathtools}\n\\usepackage{graphicx}\n\\usepackage{tikz,pgfplots}\n\\usepackage[version=4]{mhchem}\n\\usepackage{siunitx}\n\\usepackage{enumitem,multicol}\n\\pgfplotsset{compat=1.18}\n\\sisetup{output-decimal-marker={,}}\n\\renewcommand{\\familydefault}{\\sfdefault}\n\\usepackage[paperwidth=${sz[0]}in,paperheight=${sz[1]}in,margin=${c.margin}cm]{geometry}\n\\setlength{\\parindent}{0pt}\n\\begin{document}\n\\fontsize{${c.font}}{${(Number(c.font) * 1.2).toFixed(1)}}\\selectfont\n\\begin{tcolorbox}[colback=white,colframe=black,arc=3mm]\n${tex(c.school)}\\\\ ${tex(c.subject)} -- ${tex(c.level)} -- ${tex(c.test)} -- ${tex(c.period)}\\\\ Docente: ${tex(c.teacher)}\\\\ Fecha: ${tex(c.date)} -- Tiempo: ${tex(c.duration)} min\\\\ Calificación: \\rule{1cm}{.4pt} -- Puntos obtenidos: \\rule{1cm}{.4pt} -- Puntaje total: ${fmt(total())} -- Valor: ${tex(c.weight)}\\%\\\\ \\% obtenido: \\rule{1cm}{.4pt}\n\\end{tcolorbox}\nNombre: \\hrulefill\\quad Sección: \\rule{1cm}{.4pt}\\par Firma del encargado: \\hrulefill\\quad Cédula: \\hrulefill\n\\section*{Instrucciones generales} ${tex(c.instructions)}\n`;
-  let last = '';
+  let last = '', lastBlock = '';
   items.forEach((z, i) => {
     if (z.break) out += '\\newpage\n';
     const sec = sectionInfo(z);
@@ -435,6 +470,15 @@ function latex() {
       out += `${tex(sec.instructions)}\\par\n`;
       last = sec.id;
     }
+    const block = topicBlockInfo(z);
+
+    if (block && lastBlock !== block.id) {
+      if (block.visible) {
+        out += `\\subsection*{${tex(block.topic)}}\n`;
+      }
+      lastBlock = block.id;
+    }
+
     out += `\\textbf{${i + 1}.} ${tex(z.q)}${z.k === 'sel' ? '' : z.k === 'corr' ? ` (Valor: ${fmt(points(z))} puntos; ${fmt(z.p)} por acierto)` : ` (${fmt(points(z))} pts)`}\\par\n`;
     if (z.image) out += '\\textit{Figura: insertar imagen manualmente.}\\par\n';
     if (z.k === 'corr') {
@@ -459,6 +503,15 @@ function latex() {
   return out + '\\end{document}\n';
 }
 $('latex').onclick = () => {
+  if (items.length) {
+    const errors = validateTopicBlocks();
+
+    if (errors.length) {
+      alert(errors.join('\n'));
+      return say('Revisá los apartados antes de exportar.');
+    }
+  }
+
   if (!items.length) return say('Genere un examen antes de exportar a LaTeX.');
   $('texSource').value = latex();
   $('texDialog').showModal();
@@ -470,4 +523,5 @@ $('downloadTex').onclick = () => {
   setTimeout(() => URL.revokeObjectURL(u), 1000);
 };
 
+initTopicBlocks();
 initSections();
