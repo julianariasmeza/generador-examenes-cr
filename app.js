@@ -226,7 +226,7 @@ function render(clean) {
   if (c.orientation === 'Horizontal') sz.reverse();
   $('pageStyle').textContent = `@page{size:${sz[0]}in ${sz[1]}in;margin:${Number(c.margin)}cm}`;
 
-  e.innerHTML = `<div class="institution"><div>${esc(c.school)}<br>Materia: ${esc(c.subject)}<br>Profesor: ${esc(c.teacher)}<br>Tiempo probable: ${esc(c.duration)} minutos</div><div>Departamento de ${c.subject === 'Matemática' ? 'Matemática' : 'Ciencias'}<br>${esc(c.level)} nivel<br>${esc(c.test)} – ${esc(c.period)}<br>Fecha: ${esc(c.date)}</div><div>Calificación: ______ &nbsp; % obt.: ______<br>Puntos obtenidos: ______<br><b>Puntaje total: ${fmt(total())} puntos</b><br>Porcentaje: ${esc(c.weight)} %</div></div><div class="student">Nombre: __________________________________ Sección: ______<br>Firma del encargado(a): __________________ Cédula: __________</div><h4 class="center">INSTRUCCIONES GENERALES</h4><div class="instructions">${esc(c.instructions)}</div>`;
+  e.innerHTML = institutionalHeader(c);
 
   const especifica = { corr: 'Complete las correspondencias según las indicaciones.', sel: 'Marque con una X la opción correcta.', id: 'Identifique lo solicitado.', short: 'Escriba la respuesta en el espacio indicado.', restricted: 'Responda únicamente lo que se solicita.', exercise: 'Resuelva los ejercicios y muestre los procedimientos.', problem: 'Analice cada problema, plantee la solución y justifique su respuesta.', dev: 'Muestre todos los procedimientos y las unidades correspondientes.' };
   let last = '', lastBlock = '';
@@ -236,7 +236,7 @@ function render(clean) {
     if (last !== sec.id) {
       e.insertAdjacentHTML('beforeend',
         `<h3 class="sectiontitle">
-          ${esc(sec.title.toUpperCase())}
+          ${esc(sectionHeading(sec).toUpperCase())}
           <span>VALOR ${fmt(sectionPoints(sec.id))} PUNTOS</span>
         </h3>
         <p class="specific">${esc(sec.instructions)}</p>`);
@@ -270,7 +270,7 @@ function render(clean) {
       rubric = `<table class="rubric"><tr><th>Indicador</th><th>Máximo</th>${Array.from({ length: cols }, (_, j) => `<th>${j}</th>`).join('')}<th>Obtenido</th></tr>${z.rubric.map(r => `<tr><td>${esc(r.label)}</td><td>${r.p}</td>${Array.from({ length: cols }, (_, j) => `<td class="${j > r.p ? 'blocked' : ''}"></td>`).join('')}<td></td></tr>`).join('')}</table>`;
     }
     const n = i + 1;
-    e.insertAdjacentHTML('beforeend', `<div class="question ${z.break ? 'pagebreak' : ''}"><div class="tools"><button type="button" data-edit="${i}" aria-label="Editar pregunta ${n}">Editar</button><button type="button" data-move="${i},-1" aria-label="Subir pregunta ${n}">↑</button><button type="button" data-move="${i},1" aria-label="Bajar pregunta ${n}">↓</button><button type="button" data-regen="${i}" aria-label="Regenerar pregunta ${n}">Regenerar</button><button type="button" data-del="${i}" aria-label="Eliminar pregunta ${n}">Eliminar</button></div><div>${n}. ${esc(z.q)}${z.k === 'sel' ? '' : z.k === 'corr' ? ` (Valor: ${fmt(points(z))} puntos; ${fmt(z.p)} por acierto)` : ` (${fmt(points(z))} pts)`}</div>${z.image ? `<img class="figure" alt="Figura de la pregunta ${n}" src="${esc(z.image)}">` : ''}${body}${rubric}<div class="answer">Respuesta: ${esc(z.r)}<br>${esc(z.s)}</div></div>`);
+    e.insertAdjacentHTML('beforeend', `<div class="question ${z.break ? 'pagebreak' : ''}"><div class="tools"><button type="button" data-edit="${i}" aria-label="Editar pregunta ${n}">Editar</button><button type="button" data-move="${i},-1" aria-label="Subir pregunta ${n}">↑</button><button type="button" data-move="${i},1" aria-label="Bajar pregunta ${n}">↓</button><button type="button" data-regen="${i}" aria-label="Regenerar pregunta ${n}">Regenerar</button><button type="button" data-del="${i}" aria-label="Eliminar pregunta ${n}">Eliminar</button></div><div>${n}. ${esc(z.q)}${z.k === 'sel' ? '' : z.k === 'corr' ? ` (Valor: ${fmt(points(z))} puntos; ${fmt(z.p)} por acierto)` : ` (${fmt(points(z))} pts)`}</div>${figureHTML(z, n)}${body}${rubric}<div class="answer">Respuesta: ${esc(z.r)}<br>${esc(z.s)}</div></div>`);
   });
   e.classList.toggle('show', show);
   $('solution').textContent = show ? 'Ocultar soluciones' : 'Mostrar soluciones';
@@ -289,6 +289,7 @@ function edit(i) {
   $('e_rubric').value = z.rubric.map(r => r.p + ' | ' + r.label).join('\n');
   $('e_break').checked = z.break;
   $('e_image').value = '';
+  openFigureManager(z);
   $('e_remove').checked = false;
   $('dialog').showModal();
 }
@@ -319,22 +320,30 @@ $('editForm').onsubmit = async e => {
   }
 
   z.break = $('e_break').checked;
-  if ($('e_remove').checked) z.image = '';
+
+  const previousFigures = draftFigures.map(f => ({...f}));
+
+  if ($('e_remove').checked) {
+    draftFigures = [];
+  }
+
   const f = $('e_image').files[0];
+
   if (f) {
-    if (!['image/png', 'image/jpeg', 'image/webp'].includes(f.type) || f.size > 2e6) {
-      alert('Usá PNG, JPEG o WebP de hasta 2 MB.');
+    try {
+      await appendFigure(f);
+    } catch (error) {
+      draftFigures = previousFigures;
+      alert(error.message);
       return;
     }
-    try {
-      z.image = await new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => resolve(r.result);
-        r.onerror = reject;
-        r.readAsDataURL(f);
-      });
-    } catch { alert('No se pudo leer la imagen.'); return; }
   }
+
+  z.figures = draftFigures.map(f => ({...f}));
+
+  // Compatibilidad con los editores anteriores.
+  z.image = z.figures[0]?.src || '';
+
   items[i] = z;
   $('dialog').close();
   render();
@@ -466,7 +475,7 @@ function latex() {
     const sec = sectionInfo(z);
 
     if (last !== sec.id) {
-      out += `\\section*{${tex(sec.title)} -- Valor ${fmt(sectionPoints(sec.id))} puntos}\n`;
+      out += `\\section*{${tex(sectionHeading(sec))} -- Valor ${fmt(sectionPoints(sec.id))} puntos}\n`;
       out += `${tex(sec.instructions)}\\par\n`;
       last = sec.id;
     }
@@ -525,3 +534,6 @@ $('downloadTex').onclick = () => {
 
 initTopicBlocks();
 initSections();
+initDocumentSettings();
+initFigureManager();
+initBatchGenerator();

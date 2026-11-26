@@ -268,7 +268,7 @@ function renderSectionManager() {
   host.innerHTML = sections.map((s, i) => `
     <div class="section-card">
       <div class="section-card-heading">
-        <strong>${i + 1}. ${esc(s.title)}</strong>
+        <strong>${romanNumber(i + 1)}. ${esc(s.title)}</strong>
         <span>${fmt(sectionPoints(s.id))} pts</span>
       </div>
 
@@ -334,6 +334,11 @@ function initSections() {
     if (!button) return;
 
     const { action, sid, bid } = button.dataset;
+
+    if (action === 'batch') {
+      return openBatchDialog(sid, bid);
+    }
+
 
     if (action.startsWith('topic-')) {
       return handleTopicAction(action, sid, bid);

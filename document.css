@@ -1,0 +1,464 @@
+/* ==========================================
+   Exam STEM CR 2.8.1
+   Formato profesional del documento
+   ========================================== */
+
+#exam {
+  --exam-ink: #111111;
+  --exam-line: #333333;
+  --exam-spacing: 1em;
+
+  color: var(--exam-ink);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.4;
+}
+
+/* Encabezado institucional */
+
+#exam .institution {
+  border: 1px solid var(--exam-line);
+  border-radius: 0;
+  padding: 0;
+  gap: 0;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1.25fr)
+    minmax(0, 1fr);
+  font-size: .88em;
+  line-height: 1.5;
+}
+
+#exam .institution > div {
+  padding: .7em;
+  min-width: 0;
+}
+
+#exam .institution > div + div {
+  border-left: 1px solid var(--exam-line);
+}
+
+/* Datos del estudiante */
+
+#exam .student {
+  margin: .8em 0;
+  line-height: 2;
+}
+
+/* Instrucciones */
+
+#exam .center {
+  font-size: 1em;
+  font-weight: 700;
+  margin: 1em 0 .5em;
+}
+
+#exam .instructions {
+  border: 1px solid var(--exam-line);
+  padding: .8em;
+  line-height: 1.5;
+  font-size: .92em;
+}
+
+/* Encabezados de las partes */
+
+#exam .sectiontitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: .4em 1em;
+
+  border: 1px solid var(--exam-line);
+  padding: .65em .75em;
+
+  margin: 1.5em 0 .5em;
+  font-size: .95em;
+  font-weight: 700;
+
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+#exam .sectiontitle span {
+  font-size: .9em;
+  white-space: nowrap;
+}
+
+#exam .specific {
+  font-size: .92em;
+  margin: .5em 0 1em;
+  line-height: 1.5;
+}
+
+/* Apartados tematicos */
+
+#exam .exam-topic {
+  margin: 1em 0 .6em;
+  font-size: .95em;
+  font-weight: 700;
+  break-after: avoid;
+}
+
+/* Preguntas */
+
+#exam .question {
+  margin: var(--exam-spacing) 0;
+  line-height: 1.45;
+  overflow-wrap: break-word;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Alternativas */
+
+#exam .options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65em 1.8em;
+  margin: .7em 0 .8em 1.1em;
+}
+
+#exam .options > span {
+  min-width: 0;
+  max-width: 100%;
+}
+
+#exam .options.vertical {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .55em;
+}
+
+/* Espacios de respuesta */
+
+#exam .workbox,
+#exam .split {
+  border: 1px solid #555;
+  margin: .65em 0;
+}
+
+#exam .work {
+  border-bottom: 1px dotted #777;
+}
+
+#exam .line {
+  border-bottom: 1px solid #555;
+}
+
+/* Imagenes */
+
+#exam .figure {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 85%;
+  max-height: 9cm;
+  object-fit: contain;
+  margin: .8em auto;
+  break-inside: avoid;
+}
+
+/* Tablas */
+
+#exam .rubric,
+#exam .correspondence-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: .8em 0;
+}
+
+#exam .rubric th,
+#exam .correspondence-table th {
+  font-weight: 700;
+  text-align: center;
+}
+
+#exam .rubric td,
+#exam .rubric th,
+#exam .correspondence-table td,
+#exam .correspondence-table th {
+  border-color: #333;
+  padding: .5em;
+}
+
+/* Vista movil */
+
+@media screen and (max-width: 700px) {
+
+  #exam .institution {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #exam .institution > div + div {
+    border-left: 0;
+    border-top: 1px solid var(--exam-line);
+  }
+
+  #exam .sectiontitle {
+    flex-direction: column;
+  }
+
+  #exam .options {
+    margin-left: .5em;
+  }
+
+  #exam .figure {
+    max-width: 100%;
+  }
+
+}
+
+/* Impresion */
+
+@media print {
+
+  #exam {
+    color: #000;
+    background: #fff;
+    overflow: visible;
+    orphans: 2;
+    widows: 2;
+  }
+
+  #exam .institution,
+  #exam .question,
+  #exam .figure {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  #exam .sectiontitle,
+  #exam .specific,
+  #exam .exam-topic {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  #exam .pagebreak {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  #exam .rubric,
+  #exam .correspondence-table {
+    break-inside: auto;
+  }
+
+  #exam tr {
+    break-inside: avoid;
+  }
+
+  #exam .tools {
+    display: none !important;
+  }
+
+  #exam .show .answer,
+  #exam.show .answer {
+    background: none;
+    border: 0;
+  }
+
+}
+
+/* Encabezado institucional configurable */
+
+.document-settings-button {
+  width: 100%;
+  min-height: 42px;
+  color: var(--accent);
+}
+
+#documentDialog {
+  width: min(600px, 94vw);
+}
+
+#documentForm {
+  display: grid;
+  gap: .9rem;
+  padding: 1.4rem;
+}
+
+#exam .institution-logo {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 2cm;
+  max-height: 2cm;
+  object-fit: contain;
+  margin: 0 auto .5em;
+}
+
+#exam .institution-school,
+#exam .institution-test {
+  text-align: center;
+}
+
+#exam .institution-school strong,
+#exam .institution-test strong {
+  display: block;
+  font-size: 1.1em;
+  margin-bottom: .3em;
+}
+
+#exam .institution-score {
+  line-height: 1.7;
+}
+
+#exam .student-fields {
+  display: grid;
+  grid-template-columns: minmax(0,3fr) minmax(0,1fr);
+  gap: .5em 1em;
+}
+
+#exam .student-fields > div {
+  display: flex;
+  align-items: baseline;
+  gap: .5em;
+}
+
+#exam .student-blank {
+  flex: 1;
+  min-width: 1em;
+  border-bottom: 1px solid #333;
+}
+
+@media screen and (max-width: 600px) {
+
+  #exam .student-fields {
+    grid-template-columns: 1fr;
+  }
+
+  #documentForm {
+    padding: 1rem;
+  }
+
+}
+
+@media print {
+
+  #documentDialog,
+  .document-settings-button {
+    display: none !important;
+  }
+
+  #exam .student-fields {
+    break-inside: avoid;
+  }
+
+}
+
+/* Administrador de figuras */
+
+.figure-editor {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.figure-editor h3 {
+  margin: 0 0 .8rem;
+  font-size: 1rem;
+}
+
+#figureManager {
+  display: grid;
+  gap: .8rem;
+  margin-top: .8rem;
+}
+
+.figure-card {
+  display: grid;
+  gap: .6rem;
+  padding: .8rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--soft);
+}
+
+.figure-card > img {
+  display: block;
+  width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  background: white;
+}
+
+.figure-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+#exam .exam-figure {
+  max-width: 100%;
+  margin-top: .8em;
+  margin-bottom: .8em;
+  break-inside: avoid;
+}
+
+#exam .exam-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 12cm;
+  object-fit: contain;
+}
+
+#exam .figure-left {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+#exam .figure-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#exam .figure-right {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+#exam figcaption {
+  text-align: center;
+  font-size: .85em;
+  margin-top: .4em;
+}
+
+@media print {
+  .figure-editor {
+    display: none !important;
+  }
+}
+
+/* Generacion masiva */
+
+#batchDialog {
+  width: min(500px, 94vw);
+}
+
+#batchForm {
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+#batchSummary {
+  padding: .8rem;
+  background: var(--soft);
+  border-radius: 7px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+@media screen and (max-width: 600px) {
+  #batchForm {
+    padding: 1rem;
+  }
+}
+
+@media print {
+  #batchDialog {
+    display: none !important;
+  }
+}

@@ -273,6 +273,14 @@ function renderTopicBlocks(section) {
           ${!hasBankTopic(b.topic) ? 'disabled' : ''}>
           + Desde banco
         </button>
+<button type="button"
+        data-action="batch"
+        data-sid="${esc(section.id)}"
+        data-bid="${esc(b.id)}"
+        ${!hasBankTopic(b.topic) ? 'disabled' : ''}>
+  Generar varias preguntas
+</button>
+
 
       </div>
 
