@@ -1,0 +1,73 @@
+
+#physicsDialog {
+  width: min(850px, 94vw);
+  max-height: 90vh;
+  overflow: auto;
+  padding: 22px;
+  border-radius: 14px;
+}
+
+#physicsDialog h2 {
+  margin-top: 0;
+}
+
+#physicsParams {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fit,minmax(150px,1fr));
+  gap: 12px;
+  margin: 15px 0;
+}
+
+#physicsParams label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+#physicsParams input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.physics-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin: 12px 0;
+}
+
+#physicsCanvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 45vh;
+  object-fit: contain;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+#physicsNote {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+#physicsDialog .dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+
+  #physicsDialog {
+    padding: 12px;
+  }
+
+  #physicsParams {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+}
+
