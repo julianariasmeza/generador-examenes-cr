@@ -521,3 +521,41 @@ body {
   }
 
 }
+
+/* STEM - Renderizacion matematica */
+
+#exam mjx-container {
+  color: inherit;
+  font-size: 105% !important;
+}
+
+#exam mjx-container[jax="SVG"] {
+  max-width: 100%;
+}
+
+#exam mjx-container[jax="SVG"] > svg {
+  max-width: 100%;
+}
+
+#exam mjx-container[display="true"] {
+  display: block;
+  margin: 0.8em 0 !important;
+  text-align: center;
+  overflow-x: auto;
+}
+
+#exam .answer mjx-container {
+  color: inherit;
+}
+
+@media print {
+
+  #exam mjx-container {
+    break-inside: avoid;
+  }
+
+  #exam mjx-container[display="true"] {
+    overflow: visible;
+  }
+
+}

@@ -216,14 +216,53 @@ window.STEMMath = (() => {
 
   }
 
+
+  let renderQueue = Promise.resolve();
+
   function typeset(element) {
 
-    if (!window.MathJax?.typesetPromise) {
-      return Promise.resolve();
-    }
+    renderQueue = renderQueue
+      .catch(() => {})
+      .then(async () => {
 
-    return window.MathJax.typesetPromise([element])
-      .catch(error => console.warn('MathJax:', error));
+        const mj = window.MathJax;
+
+        if (!mj?.startup?.promise) {
+
+          console.warn(
+            'MathJax no se encuentra disponible.'
+          );
+
+          return;
+
+        }
+
+        await mj.startup.promise;
+
+        if (!element || !element.isConnected) return;
+
+        if (typeof mj.typesetPromise !== 'function') {
+
+          console.error(
+            'MathJax no pudo inicializarse.'
+          );
+
+          return;
+
+        }
+
+        await mj.typesetPromise([element]);
+
+      })
+      .catch(error => {
+
+        console.error(
+          'Error al renderizar formulas:', error
+        );
+
+      });
+
+    return renderQueue;
 
   }
 
