@@ -232,7 +232,7 @@ function render(clean) {
       rubric = `<table class="rubric"><tr><th>Indicador</th><th>Máximo</th>${Array.from({ length: cols }, (_, j) => `<th>${j}</th>`).join('')}<th>Obtenido</th></tr>${z.rubric.map(r => `<tr><td>${esc(r.label)}</td><td>${r.p}</td>${Array.from({ length: cols }, (_, j) => `<td class="${j > r.p ? 'blocked' : ''}"></td>`).join('')}<td></td></tr>`).join('')}</table>`;
     }
     const n = i + 1;
-    e.insertAdjacentHTML('beforeend', `<div class="question ${z.break ? 'pagebreak' : ''}"><div class="tools"><button type="button" data-edit="${i}" aria-label="Editar pregunta ${n}">Editar</button><button type="button" data-move="${i},-1" aria-label="Subir pregunta ${n}">↑</button><button type="button" data-move="${i},1" aria-label="Bajar pregunta ${n}">↓</button><button type="button" data-regen="${i}" aria-label="Regenerar pregunta ${n}">Regenerar</button><button type="button" data-del="${i}" aria-label="Eliminar pregunta ${n}">Eliminar</button></div><div>${n}. ${esc(z.q)} (${fmt(points(z))} pts)</div>${z.image ? `<img class="figure" alt="Figura de la pregunta ${n}" src="${esc(z.image)}">` : ''}${body}${rubric}<div class="answer">Respuesta: ${esc(z.r)}<br>${esc(z.s)}</div></div>`);
+    e.insertAdjacentHTML('beforeend', `<div class="question ${z.break ? 'pagebreak' : ''}"><div class="tools"><button type="button" data-edit="${i}" aria-label="Editar pregunta ${n}">Editar</button><button type="button" data-move="${i},-1" aria-label="Subir pregunta ${n}">↑</button><button type="button" data-move="${i},1" aria-label="Bajar pregunta ${n}">↓</button><button type="button" data-regen="${i}" aria-label="Regenerar pregunta ${n}">Regenerar</button><button type="button" data-del="${i}" aria-label="Eliminar pregunta ${n}">Eliminar</button></div><div>${n}. ${esc(z.q)}${z.k === 'sel' ? '' : ` (${fmt(points(z))} pts)`}</div>${z.image ? `<img class="figure" alt="Figura de la pregunta ${n}" src="${esc(z.image)}">` : ''}${body}${rubric}<div class="answer">Respuesta: ${esc(z.r)}<br>${esc(z.s)}</div></div>`);
   });
   e.classList.toggle('show', show);
   $('solution').textContent = show ? 'Ocultar soluciones' : 'Mostrar soluciones';
@@ -392,7 +392,7 @@ function latex() {
   items.forEach((z, i) => {
     if (z.break) out += '\\newpage\n';
     if (last !== z.k) { out += `\\section*{${tex(label(z.k))} -- Valor ${fmt(section(z.k))} puntos}\n`; last = z.k; }
-    out += `\\textbf{${i + 1}.} ${tex(z.q)} (${fmt(points(z))} pts)\\par\n`;
+    out += `\\textbf{${i + 1}.} ${tex(z.q)}${z.k === 'sel' ? '' : ` (${fmt(points(z))} pts)`}\\par\n`;
     if (z.image) out += '\\textit{Figura: insertar imagen manualmente.}\\par\n';
     if (z.k === 'sel') {
       out += z.options.map((o, j) => `${tex(mark(z, j) === '□' ? '( )' : mark(z, j))} ${tex(o)}`).join(z.layout === 'Vertical' ? '\\par\n' : '\\quad ') + '\\par\n';
