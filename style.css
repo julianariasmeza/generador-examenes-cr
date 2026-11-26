@@ -559,3 +559,71 @@ body {
   }
 
 }
+
+/* ==========================================
+   Exam STEM CR 2.6.1
+   Correspondencia
+   ========================================== */
+
+.correspondence-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin: 12px 0;
+  font-size: 1em;
+  color: #111;
+}
+
+.correspondence-table th {
+  border: 1px solid #555;
+  padding: 8px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.correspondence-table td {
+  border: 1px solid #555;
+  padding: 8px;
+  vertical-align: middle;
+  overflow-wrap: break-word;
+}
+
+.correspondence-table td:first-child {
+  width: 45%;
+}
+
+.correspondence-table td:last-child {
+  width: 43%;
+}
+
+.correspondence-table .corr-parenthesis {
+  width: 12%;
+  text-align: center;
+  white-space: nowrap;
+  border-left: none;
+}
+
+.corr-parenthesis span {
+  display: inline-block;
+  min-width: 1.4em;
+  color: #7629a4;
+  font-weight: 700;
+}
+
+@media print {
+
+  .correspondence-table {
+    width: 100%;
+    break-inside: avoid;
+  }
+
+  .correspondence-table td,
+  .correspondence-table th {
+    padding: 6px;
+  }
+
+  .correspondence-table tr {
+    break-inside: avoid;
+  }
+
+}

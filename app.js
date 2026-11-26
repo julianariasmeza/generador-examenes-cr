@@ -24,6 +24,7 @@ const fields = [
 ];
 const types = [
   ['sel', 'Selección de respuesta', 10, 1],
+  ['corr', 'Correspondencia', 0, 1],
   ['id', 'Identificación', 5, 1],
   ['short', 'Respuesta corta', 3, 2],
   ['dev', 'Desarrollo', 2, 5]
@@ -49,7 +50,7 @@ function field(id, label, value) {
 }
 fields.forEach(x => $('fields').append(field(...x)));
 types.forEach(([k, n, c, p]) => {
-  $('counts').append(field(k, n + ' (cantidad)', c), field(k + 'p', 'Puntos por ítem', p));
+  $('counts').append(field(k, n + ' (cantidad)', c), field(k + 'p', k === 'corr' ? 'Puntos por acierto' : 'Puntos por ítem', p));
 });
 
 function refresh() {
@@ -141,18 +142,21 @@ function question(topic) {
 /* ---------- Estado del examen ---------- */
 let items = [], config = {}, show = false, dirty = false;
 
-const points = z => z.rubric?.length ? z.rubric.reduce((a, r) => a + Number(r.p), 0) : Number(z.p);
+const points = z => z.k === 'corr' ? window.STEMCorrespondence.points(z) : z.rubric?.length ? z.rubric.reduce((a, r) => a + Number(r.p), 0) : Number(z.p);
 const total = () => items.reduce((a, z) => a + points(z), 0);
 const section = k => items.filter(z => z.k === k).reduce((a, z) => a + points(z), 0);
 
 function totals() {
-  const t = types.reduce((a, [k]) => a + num(k) * num(k + 'p'), 0);
+  const t = types.reduce((a, [k]) => a + num(k) * num(k + 'p') * (k === 'corr' ? 4 : 1), 0);
   $('total').textContent = Number.isFinite(t) ? 'Puntaje previsto: ' + fmt(t) + ' puntos' : 'Revise cantidades y puntajes.';
 }
 $('counts').oninput = totals;
 totals();
 
 function make(k, p, topic) {
+  if (k === 'corr') {
+    return window.STEMCorrespondence.create(p, topic, question, shuffle);
+  }
   const z = question(topic);
   const n = Number(config.alternatives || 3);
   const options = shuffle([z.r, ...z.options.filter(o => o !== z.r).slice(0, n - 1)]);
@@ -177,8 +181,8 @@ function generate() {
   for (const [k] of types) {
     for (let i = 0; i < num(k); i++) {
       let z, tries = 0;
-      do { z = make(k, num(k + 'p'), val('topic')); } while (seen.has(z.q) && ++tries < 200);
-      if (seen.has(z.q)) {
+      do { z = make(k, num(k + 'p'), val('topic')); } while (k !== 'corr' && seen.has(z.q) && ++tries < 200);
+      if (k !== 'corr' && seen.has(z.q)) {
         config = old;
         say(`El banco de este tema solo alcanza para ${next.length} preguntas distintas. Reducí la cantidad total o elegí otro tema.`);
         return;
@@ -209,14 +213,16 @@ function render(clean) {
 
   e.innerHTML = `<div class="institution"><div>${esc(c.school)}<br>Materia: ${esc(c.subject)}<br>Profesor: ${esc(c.teacher)}<br>Tiempo probable: ${esc(c.duration)} minutos</div><div>Departamento de ${c.subject === 'Matemática' ? 'Matemática' : 'Ciencias'}<br>${esc(c.level)} nivel<br>${esc(c.test)} – ${esc(c.period)}<br>Fecha: ${esc(c.date)}</div><div>Calificación: ______ &nbsp; % obt.: ______<br>Puntos obtenidos: ______<br><b>Puntaje total: ${fmt(total())} puntos</b><br>Porcentaje: ${esc(c.weight)} %</div></div><div class="student">Nombre: __________________________________ Sección: ______<br>Firma del encargado(a): __________________ Cédula: __________</div><h4 class="center">INSTRUCCIONES GENERALES</h4><div class="instructions">${esc(c.instructions)}</div>`;
 
-  const especifica = { sel: 'Marque con una X la opción correcta.', id: 'Identifique lo solicitado.', short: 'Escriba la respuesta en el espacio indicado.', dev: 'Muestre todos los procedimientos y las unidades correspondientes.' };
+  const especifica = { corr: 'Complete las correspondencias según las indicaciones.', sel: 'Marque con una X la opción correcta.', id: 'Identifique lo solicitado.', short: 'Escriba la respuesta en el espacio indicado.', dev: 'Muestre todos los procedimientos y las unidades correspondientes.' };
   let last = '';
   items.forEach((z, i) => {
     if (last !== z.k) {
       e.insertAdjacentHTML('beforeend', `<h3 class="sectiontitle">${esc(label(z.k).toUpperCase())}<span>VALOR ${fmt(section(z.k))} PUNTOS</span></h3><p class="specific">${esc(config['inst_' + z.k] || especifica[z.k])}</p>`);
       last = z.k;
     }
-    const body = z.k === 'sel'
+    const body = z.k === 'corr'
+      ? window.STEMCorrespondence.html(z, esc, show)
+      : z.k === 'sel'
       ? `<div class="options ${z.layout === 'Vertical' ? 'vertical' : ''}">${z.options.map((o, j) => `<span>${mark(z, j)} ${esc(o)}</span>`).join('')}</div>`
       : z.parts.length
         ? z.parts.map((p, j) => `<div class="workbox" style="min-height:${z.space}cm">${String.fromCharCode(97 + j)}) ${esc(p)}</div>`).join('')
@@ -232,7 +238,7 @@ function render(clean) {
       rubric = `<table class="rubric"><tr><th>Indicador</th><th>Máximo</th>${Array.from({ length: cols }, (_, j) => `<th>${j}</th>`).join('')}<th>Obtenido</th></tr>${z.rubric.map(r => `<tr><td>${esc(r.label)}</td><td>${r.p}</td>${Array.from({ length: cols }, (_, j) => `<td class="${j > r.p ? 'blocked' : ''}"></td>`).join('')}<td></td></tr>`).join('')}</table>`;
     }
     const n = i + 1;
-    e.insertAdjacentHTML('beforeend', `<div class="question ${z.break ? 'pagebreak' : ''}"><div class="tools"><button type="button" data-edit="${i}" aria-label="Editar pregunta ${n}">Editar</button><button type="button" data-move="${i},-1" aria-label="Subir pregunta ${n}">↑</button><button type="button" data-move="${i},1" aria-label="Bajar pregunta ${n}">↓</button><button type="button" data-regen="${i}" aria-label="Regenerar pregunta ${n}">Regenerar</button><button type="button" data-del="${i}" aria-label="Eliminar pregunta ${n}">Eliminar</button></div><div>${n}. ${esc(z.q)}${z.k === 'sel' ? '' : ` (${fmt(points(z))} pts)`}</div>${z.image ? `<img class="figure" alt="Figura de la pregunta ${n}" src="${esc(z.image)}">` : ''}${body}${rubric}<div class="answer">Respuesta: ${esc(z.r)}<br>${esc(z.s)}</div></div>`);
+    e.insertAdjacentHTML('beforeend', `<div class="question ${z.break ? 'pagebreak' : ''}"><div class="tools"><button type="button" data-edit="${i}" aria-label="Editar pregunta ${n}">Editar</button><button type="button" data-move="${i},-1" aria-label="Subir pregunta ${n}">↑</button><button type="button" data-move="${i},1" aria-label="Bajar pregunta ${n}">↓</button><button type="button" data-regen="${i}" aria-label="Regenerar pregunta ${n}">Regenerar</button><button type="button" data-del="${i}" aria-label="Eliminar pregunta ${n}">Eliminar</button></div><div>${n}. ${esc(z.q)}${z.k === 'sel' ? '' : z.k === 'corr' ? ` (Valor: ${fmt(points(z))} puntos; ${fmt(z.p)} por acierto)` : ` (${fmt(points(z))} pts)`}</div>${z.image ? `<img class="figure" alt="Figura de la pregunta ${n}" src="${esc(z.image)}">` : ''}${body}${rubric}<div class="answer">Respuesta: ${esc(z.r)}<br>${esc(z.s)}</div></div>`);
   });
   e.classList.toggle('show', show);
   $('solution').textContent = show ? 'Ocultar soluciones' : 'Mostrar soluciones';
@@ -243,6 +249,7 @@ function render(clean) {
 /* ---------- Edición de preguntas ---------- */
 function edit(i) {
   const z = items[i];
+  window.STEMCorrespondence.editor(z.k === 'corr');
   $('editIndex').value = i;
   for (const k of ['q', 'r', 's', 'p', 'space', 'layout', 'marker', 'mode']) $('e_' + k).value = z[k];
   $('e_options').value = z.options.join('\n');
@@ -271,6 +278,14 @@ $('editForm').onsubmit = async e => {
     alert('Revisá el enunciado, respuesta, puntajes, espacio y alternativas (3 o 4 distintas, incluida la respuesta correcta). Rúbrica: 1–10 puntos por indicador.');
     return;
   }
+  if (z.k === 'corr') {
+    z.rubric = [];
+    if (!window.STEMCorrespondence.validate(z)) {
+      alert('Revisá las columnas y la clave. Cada símbolo debe ser único. Usá un guion para los elementos sobrantes de la columna A.');
+      return;
+    }
+  }
+
   z.break = $('e_break').checked;
   if ($('e_remove').checked) z.image = '';
   const f = $('e_image').files[0];
@@ -305,7 +320,7 @@ $('exam').onclick = e => {
     const i = +d.regen, z = items[i];
     for (let t = 0; t < 200; t++) {
       const n = make(z.k, z.p, z.topic);
-      if (!items.some(x => x.q === n.q)) { items[i] = n; render(); return; }
+      if (z.k === 'corr' || !items.some(x => x.q === n.q)) { items[i] = n; render(); return; }
     }
     say('No hay otra pregunta distinta disponible.');
   }
@@ -326,8 +341,10 @@ $('solution').onclick = () => { show = !show; render(!dirty); };
 $('add').onclick = () => {
   if (!items.length) return say('Genere un examen antes de agregar preguntas.');
   const k = $('addType').value, z = make(k, 1, config.topic);
+  if (k !== 'corr') {
   z.q = 'Escriba el enunciado aquí'; z.r = 'Respuesta'; z.s = 'Procedimiento';
   z.options = ['Respuesta', 'Alternativa 2', 'Alternativa 3', ...(config.alternatives === '4' ? ['Alternativa 4'] : [])];
+  }
   let i = items.findLastIndex(x => x.k === k);
   if (i < 0) {
     items.push(z);
@@ -392,9 +409,11 @@ function latex() {
   items.forEach((z, i) => {
     if (z.break) out += '\\newpage\n';
     if (last !== z.k) { out += `\\section*{${tex(label(z.k))} -- Valor ${fmt(section(z.k))} puntos}\n`; last = z.k; }
-    out += `\\textbf{${i + 1}.} ${tex(z.q)}${z.k === 'sel' ? '' : ` (${fmt(points(z))} pts)`}\\par\n`;
+    out += `\\textbf{${i + 1}.} ${tex(z.q)}${z.k === 'sel' ? '' : z.k === 'corr' ? ` (Valor: ${fmt(points(z))} puntos; ${fmt(z.p)} por acierto)` : ` (${fmt(points(z))} pts)`}\\par\n`;
     if (z.image) out += '\\textit{Figura: insertar imagen manualmente.}\\par\n';
-    if (z.k === 'sel') {
+    if (z.k === 'corr') {
+      out += window.STEMCorrespondence.latex(z, tex, show);
+    } else if (z.k === 'sel') {
       out += z.options.map((o, j) => `${tex(mark(z, j) === '□' ? '( )' : mark(z, j))} ${tex(o)}`).join(z.layout === 'Vertical' ? '\\par\n' : '\\quad ') + '\\par\n';
     } else {
       const parts = z.parts.length ? z.parts : [''];
