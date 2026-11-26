@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "./static/css/main.dbef78a8.css",
+    "main.js": "./static/js/main.63a73984.js",
+    "popup.css": "./static/css/popup.dbef78a8.css",
+    "popup.js": "./static/js/popup.862b54d2.js",
+    "duo.css": "./static/css/duo.e5bedf38.css",
+    "duo.js": "./static/js/duo.a92e8cb1.js",
+    "closable.css": "./static/css/closable.dbef78a8.css",
+    "closable.js": "./static/js/closable.a3a06161.js",
+    "static/js/127.79e62b30.chunk.js": "./static/js/127.79e62b30.chunk.js",
+    "static/css/622.5b956bf4.chunk.css": "./static/css/622.5b956bf4.chunk.css",
+    "static/js/622.c629cbfa.chunk.js": "./static/js/622.c629cbfa.chunk.js",
+    "static/js/874.c98c2866.chunk.js": "./static/js/874.c98c2866.chunk.js",
+    "static/js/435.72ec44bb.chunk.js": "./static/js/435.72ec44bb.chunk.js",
+    "closable.html": "./closable.html",
+    "popup.html": "./popup.html",
+    "duo.html": "./duo.html",
+    "index.html": "./index.html",
+    "serve.json": "./serve.json"
+  },
+  "entrypoints": [
+    "static/css/main.dbef78a8.css",
+    "static/js/main.63a73984.js"
+  ]
+}
