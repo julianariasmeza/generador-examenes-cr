@@ -535,8 +535,12 @@
   }
 
   .ML__menu {
-    max-height: 65vh;
-    overflow-y: auto;
+    max-height: none;
+    overflow: visible !important;
+  }
+
+  .ML__menu-container {
+    overflow: visible !important;
   }
 
   .ML__keyboard {
