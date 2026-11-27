@@ -574,3 +574,4 @@ initSections();
 initDocumentSettings();
 initFigureManager();
 initBatchGenerator();
+initSpecifications();

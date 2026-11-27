@@ -1,0 +1,127 @@
+/* Exam STEM CR 2.8.2 - Tabla de especificaciones */
+
+#specDialog {
+  width: min(1500px, 96vw);
+  max-width: 96vw;
+  max-height: 92dvh;
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+.spec-settings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.spec-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .75rem;
+  margin: 1rem 0;
+}
+
+.spec-metric {
+  border: 1px solid #64748b;
+  border-radius: 10px;
+  padding: .85rem;
+}
+
+.spec-metric span {
+  display: block;
+  font-size: .85rem;
+}
+
+.spec-metric strong {
+  display: block;
+  font-size: 1.5rem;
+  margin-top: .4rem;
+}
+
+.spec-table-wrap {
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.spec-table {
+  width: 100%;
+  min-width: 1450px;
+  border-collapse: collapse;
+  font-size: .85rem;
+}
+
+.spec-table th,
+.spec-table td {
+  border: 1px solid #64748b;
+  padding: .45rem;
+  vertical-align: middle;
+}
+
+.spec-table th {
+  background: rgba(100,116,139,.15);
+}
+
+.spec-table input,
+.spec-table textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.spec-table textarea {
+  min-width: 150px;
+  min-height: 70px;
+  resize: vertical;
+}
+
+.spec-table input[type="number"] {
+  min-width: 65px;
+}
+
+.spec-table .spec-number {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.spec-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin: 1rem 0;
+}
+
+.spec-ok {
+  color: #22c55e;
+}
+
+.spec-warning {
+  color: #f59e0b;
+}
+
+.spec-validation {
+  margin: 1rem 0;
+  line-height: 1.6;
+}
+
+#openSpecifications {
+  width: 100%;
+  margin: .75rem 0;
+}
+
+@media screen and (max-width: 700px) {
+  .spec-settings {
+    grid-template-columns: 1fr;
+  }
+
+  .spec-summary {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+}
+
+@media print {
+  #specDialog,
+  #openSpecifications {
+    display: none !important;
+  }
+}
