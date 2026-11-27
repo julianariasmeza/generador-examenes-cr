@@ -41,7 +41,7 @@
 
     style.textContent += `
       .ML__menu-toggle > div > menu.ui-menu-container:first-of-type {
-        translate: -370px -100px !important;
+        translate: -370px -220px !important;
       }
     `;
 
