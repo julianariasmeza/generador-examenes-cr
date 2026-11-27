@@ -239,7 +239,7 @@ function renderSpecificationComparison() {
   if (result.unlinked.length) {
     messages.push(
       'Preguntas sin vincular: ' +
-      result.unlinked.join(', ')
+      questionReferences(result.unlinked).join('; ')
     );
   }
 

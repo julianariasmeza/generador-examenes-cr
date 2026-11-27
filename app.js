@@ -234,6 +234,22 @@ function questionNumbersBySection() {
   });
 }
 
+function questionReferences(indices) {
+  const numbers = questionNumbersBySection();
+
+  return indices.map(index => {
+    const i = Number(index) - 1;
+    const question = items[i];
+
+    if (!question) return String(index);
+
+    const section = sectionInfo(question);
+
+    return sectionHeading(section) +
+      ' - pregunta ' + numbers[i];
+  });
+}
+
 function render(clean) {
   dirty = !clean && Boolean(config.paper);
   if (!config.paper) {

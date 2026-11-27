@@ -444,7 +444,7 @@ async function buildSpecificationsWorkbook() {
 
   compare.addRow([
     'Preguntas sin vincular',
-    comparison.unlinked.join(', ')
+    questionReferences(comparison.unlinked).join('; ')
   ]);
 
   compare.addRow([
