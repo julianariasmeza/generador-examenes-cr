@@ -11,7 +11,7 @@ async function inspect(name, engine, width, height, keyboard) {
   try {
 
     const page = await browser.newPage({
-      viewport: { width, height }
+      viewport: { width, height }, locale: 'es-CR'
     });
 
     page.on('pageerror', e =>
@@ -30,9 +30,27 @@ async function inspect(name, engine, width, height, keyboard) {
       timeout: 30000
     });
 
+    await page.click('#blankExam');
+
+    await page.evaluate(() => {
+      for (const [k] of types) {
+        $(k).value = 0;
+        $(k + 'p').value = 1;
+      }
+
+      $('sel').value = 1;
+      generate();
+    });
+
+    await page.locator('[data-edit="0"]').click();
+
+    await page.locator(
+      '#dialog .formula-trigger'
+    ).first().click();
+
     await page.evaluate(() => {
 
-      document.getElementById('mathDialog').showModal();
+
 
       const mf = document.getElementById('visualMath');
 
@@ -114,6 +132,42 @@ async function inspect(name, engine, width, height, keyboard) {
 
     console.log('===== ' + name + ' =====');
     console.log('Menu principal:', data.filter(e => e.tag === 'MENU'));
+    const ancestors = await page.locator(
+      'menu.ui-menu-container:visible'
+    ).first().evaluate(el => {
+      const result = [];
+
+      while (el) {
+        const css = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+
+        result.push({
+          tag: el.tagName,
+          id: el.id,
+          class: el.className,
+          overflowX: css.overflowX,
+          overflowY: css.overflowY,
+          position: css.position,
+          zIndex: css.zIndex,
+          contain: css.contain,
+          transform: css.transform,
+          clipPath: css.clipPath,
+          width: Math.round(r.width),
+          height: Math.round(r.height)
+        });
+
+        el = el.parentElement ||
+          el.getRootNode().host || null;
+      }
+
+      return result;
+    });
+
+    console.log(
+      'CONTENEDORES:',
+      JSON.stringify(ancestors)
+    );
+
     const submenus = page.locator(
       'menu.ui-menu-container:visible > li[aria-haspopup="true"]'
     );
