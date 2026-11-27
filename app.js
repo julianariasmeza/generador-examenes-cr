@@ -223,6 +223,17 @@ const sizes = { Carta: [8.5, 11], Legal: [8.5, 14], 'Doble carta': [11, 17], Ofi
 const label = k => types.find(t => t[0] === k)[1];
 const mark = (z, j) => z.marker === 'Letras' ? String.fromCharCode(97 + j) + '.' : z.marker === 'Casillas' ? '□' : '(   )';
 
+function questionNumbersBySection() {
+  const counters = new Map();
+
+  return items.map(z => {
+    const id = sectionInfo(z).id;
+    const n = (counters.get(id) || 0) + 1;
+    counters.set(id, n);
+    return n;
+  });
+}
+
 function render(clean) {
   dirty = !clean && Boolean(config.paper);
   if (!config.paper) {
@@ -243,6 +254,7 @@ function render(clean) {
   e.innerHTML = institutionalHeader(c);
 
   const especifica = { corr: 'Complete las correspondencias según las indicaciones.', sel: 'Marque con una X la opción correcta.', id: 'Identifique lo solicitado.', short: 'Escriba la respuesta en el espacio indicado.', restricted: 'Responda únicamente lo que se solicita.', exercise: 'Resuelva los ejercicios y muestre los procedimientos.', problem: 'Analice cada problema, plantee la solución y justifique su respuesta.', dev: 'Muestre todos los procedimientos y las unidades correspondientes.' };
+  const questionNumbers = questionNumbersBySection();
   let last = '', lastBlock = '';
   items.forEach((z, i) => {
     const sec = sectionInfo(z);
@@ -283,7 +295,7 @@ function render(clean) {
       const cols = Math.min(10, Math.ceil(Math.max(...z.rubric.map(r => r.p)))) + 1;
       rubric = `<table class="rubric"><tr><th>Indicador</th><th>Máximo</th>${Array.from({ length: cols }, (_, j) => `<th>${j}</th>`).join('')}<th>Obtenido</th></tr>${z.rubric.map(r => `<tr><td>${esc(r.label)}</td><td>${r.p}</td>${Array.from({ length: cols }, (_, j) => `<td class="${j > r.p ? 'blocked' : ''}"></td>`).join('')}<td></td></tr>`).join('')}</table>`;
     }
-    const n = i + 1;
+    const n = questionNumbers[i];
     e.insertAdjacentHTML('beforeend', `<div class="question ${z.break ? 'pagebreak' : ''}"><div class="tools"><button type="button" data-edit="${i}" aria-label="Editar pregunta ${n}">Editar</button><button type="button" data-move="${i},-1" aria-label="Subir pregunta ${n}">↑</button><button type="button" data-move="${i},1" aria-label="Bajar pregunta ${n}">↓</button><button type="button" data-regen="${i}" aria-label="Regenerar pregunta ${n}">Regenerar</button><button type="button" data-del="${i}" aria-label="Eliminar pregunta ${n}">Eliminar</button></div><div>${n}. ${esc(z.q)}${z.k === 'sel' ? '' : z.k === 'corr' ? ` (Valor: ${fmt(points(z))} puntos; ${fmt(z.p)} por acierto)` : ` (${fmt(points(z))} pts)`}</div>${figureHTML(z, n)}${body}${rubric}<div class="answer">Respuesta: ${esc(z.r)}<br>${esc(z.s)}</div></div>`);
   });
 
@@ -517,6 +529,7 @@ const texPlain = s => String(s ?? '')
 const tex = s => window.STEMMath.exportTex(s, texPlain);
 
 function latex() {
+  const questionNumbers = questionNumbersBySection();
   const c = config, sz = [...sizes[c.paper]];
   if (c.orientation === 'Horizontal') sz.reverse();
   let out = `\\documentclass{article}\n\\usepackage[utf8]{inputenc}\n\\usepackage[T1]{fontenc}\n\\usepackage[spanish]{babel}\n\\usepackage{helvet,xcolor,tabularx,tcolorbox}\n\\usepackage{amsmath,amssymb,mathtools}\n\\usepackage{graphicx}\n\\usepackage{tikz,pgfplots}\n\\usepackage[version=4]{mhchem}\n\\usepackage{siunitx}\n\\usepackage{enumitem,multicol}\n\\pgfplotsset{compat=1.18}\n\\sisetup{output-decimal-marker={,}}\n\\renewcommand{\\familydefault}{\\sfdefault}\n\\usepackage[paperwidth=${sz[0]}in,paperheight=${sz[1]}in,margin=${c.margin}cm]{geometry}\n\\setlength{\\parindent}{0pt}\n\\begin{document}\n\\fontsize{${c.font}}{${(Number(c.font) * 1.2).toFixed(1)}}\\selectfont\n\\begin{tcolorbox}[colback=white,colframe=black,arc=3mm]\n${tex(c.school)}\\\\ ${tex(c.subject)} -- ${tex(c.level)} -- ${tex(c.test)} -- ${tex(c.period)}\\\\ Docente: ${tex(c.teacher)}\\\\ Fecha: ${tex(c.date)} -- Tiempo: ${tex(c.duration)} min\\\\ Calificación: \\rule{1cm}{.4pt} -- Puntos obtenidos: \\rule{1cm}{.4pt} -- Puntaje total: ${fmt(total())} -- Valor: ${tex(c.weight)}\\%\\\\ \\% obtenido: \\rule{1cm}{.4pt}\n\\end{tcolorbox}\nNombre: \\hrulefill\\quad Sección: \\rule{1cm}{.4pt}\\par Firma del encargado: \\hrulefill\\quad Cédula: \\hrulefill\n\\section*{Instrucciones generales} ${tex(c.instructions)}\n`;
@@ -539,7 +552,7 @@ function latex() {
       lastBlock = block.id;
     }
 
-    out += `\\textbf{${i + 1}.} ${tex(z.q)}${z.k === 'sel' ? '' : z.k === 'corr' ? ` (Valor: ${fmt(points(z))} puntos; ${fmt(z.p)} por acierto)` : ` (${fmt(points(z))} pts)`}\\par\n`;
+    out += `\\textbf{${questionNumbers[i]}.} ${tex(z.q)}${z.k === 'sel' ? '' : z.k === 'corr' ? ` (Valor: ${fmt(points(z))} puntos; ${fmt(z.p)} por acierto)` : ` (${fmt(points(z))} pts)`}\\par\n`;
     if (z.image) out += '\\textit{Figura: insertar imagen manualmente.}\\par\n';
     if (z.k === 'corr') {
       out += window.STEMCorrespondence.latex(z, tex, show);
