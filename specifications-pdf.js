@@ -352,13 +352,13 @@ ${validation.valid ? '' : `
 
     <tr>
 
-      <th rowspan="2">N.º</th>
-      <th rowspan="2">Tema</th>
-      <th rowspan="2">Aprendizaje</th>
-      <th rowspan="2">Indicador</th>
-      <th rowspan="2">Lecciones</th>
-      <th rowspan="2">Pts. parcial</th>
-      <th rowspan="2">Puntos</th>
+      <th rowspan="${visibleTypes.length ? 2 : 1}">N.º</th>
+      <th rowspan="${visibleTypes.length ? 2 : 1}">Tema</th>
+      <th rowspan="${visibleTypes.length ? 2 : 1}">Aprendizaje</th>
+      <th rowspan="${visibleTypes.length ? 2 : 1}">Indicador</th>
+      <th rowspan="${visibleTypes.length ? 2 : 1}">Lecciones</th>
+      <th rowspan="${visibleTypes.length ? 2 : 1}">Pts. parcial</th>
+      <th rowspan="${visibleTypes.length ? 2 : 1}">Puntos</th>
 
       ${visibleTypes.length ? `
         <th colspan="${visibleTypes.length}">
@@ -374,7 +374,7 @@ ${validation.valid ? '' : `
           `<th>${t.code}</th>`
         ).join('')}
       </tr>
-    ` : '<tr></tr>'}
+    ` : ''}
 
   </thead>
 

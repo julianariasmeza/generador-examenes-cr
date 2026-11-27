@@ -400,6 +400,15 @@ function initSpecifications() {
     updateSpecifications();
   };
 
+  $('specRows').onchange = e => {
+
+    const field = e.target.dataset.field;
+
+    if (['topic', 'learning', 'indicator'].includes(field)) {
+      renderSpecificationLinks();
+    }
+  };
+
   $('specRows').onclick = e => {
 
     const button = e.target.closest('[data-remove]');

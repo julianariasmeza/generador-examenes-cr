@@ -479,19 +479,19 @@ async function buildSpecificationsWorkbook() {
   const metadata = [
 
     ['Dirección regional', spec.regional],
-    ['Centro educativo', config.school],
-    ['Docente', config.teacher],
-    ['Asignatura', config.subject],
-    ['Nivel', config.level],
+    ['Centro educativo', {formula: "'Especificaciones'!B4", result: config.school || ''}],
+    ['Docente', {formula: "'Especificaciones'!B5", result: config.teacher || ''}],
+    ['Asignatura', {formula: "'Especificaciones'!B6", result: config.subject || ''}],
+    ['Nivel', {formula: "'Especificaciones'!B7", result: config.level || ''}],
     ['Período', config.period],
     ['Fecha', config.date],
     ['Prueba', config.test],
     ['Valor porcentual', Number(config.weight || 0) / 100],
     ['Papel', spec.paper],
-    ['Puntuación preliminar', spec.preliminaryPoints],
-    ['Total de lecciones', result.totalLessons],
-    ['Constante', result.constant],
-    ['Puntos definitivos', result.finalPoints],
+    ['Puntuación preliminar', {formula: "'Especificaciones'!B8", result: spec.preliminaryPoints}],
+    ['Total de lecciones', {formula: "'Especificaciones'!B9", result: result.totalLessons}],
+    ['Constante', {formula: "'Especificaciones'!B10", result: result.constant}],
+    ['Puntos definitivos', {formula: "'Especificaciones'!B11", result: result.finalPoints}],
     ['Puntos reales', comparison.actualTotal]
   ];
 

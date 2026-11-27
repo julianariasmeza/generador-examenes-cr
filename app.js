@@ -183,7 +183,19 @@ function generate() {
     return;
   }
   const old = config;
+
+  const keepSpecifications =
+    Boolean(old.specifications) &&
+    confirm('¿Conservar la tabla de especificaciones existente?');
+
   config = Object.fromEntries(fields.map(([k]) => [k, val(k)]));
+
+  if (keepSpecifications) {
+    config.specifications =
+      STEMSpecifications.create(old.specifications);
+
+    config.specificationLinks = {};
+  }
   const next = [], seen = new Set();
   for (const [k] of types) {
     for (let i = 0; i < num(k); i++) {
@@ -201,7 +213,9 @@ function generate() {
   items = next;
   examSections();
   render();
-  say('Examen generado. Revisá preguntas y clave.');
+  say(keepSpecifications
+    ? 'Examen generado. Planificación conservada. Revisá los vínculos de indicadores.'
+    : 'Examen generado. Revisá preguntas y clave.');
 }
 
 /* ---------- Presentación ---------- */
