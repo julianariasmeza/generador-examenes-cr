@@ -71,6 +71,7 @@ const STEMSpecifications = (() => {
       preliminaryPoints: number(data.preliminaryPoints),
       paper: data.paper || 'Carta',
       hideUnusedTypes: data.hideUnusedTypes === true,
+    showSignature: data.showSignature !== false,
       rows: Array.isArray(data.rows)
         ? data.rows.map(createRow)
         : []

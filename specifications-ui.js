@@ -36,6 +36,7 @@ function openSpecifications() {
   $('specPreliminary').value = specDraft.preliminaryPoints;
   $('specPaper').value = specDraft.paper;
   $('specHideUnused').checked = specDraft.hideUnusedTypes;
+  $('specShowSignature').checked = specDraft.showSignature;
 
   renderSpecifications();
 
@@ -333,6 +334,20 @@ function initSpecifications() {
   `);
 
   initSpecificationLinks();
+  initSpecificationsExcel();
+  initSpecificationsPDF();
+
+  $('specHideUnused').closest('label').insertAdjacentHTML(
+    'afterend',
+    `<label>
+       <input type="checkbox" id="specShowSignature">
+       Incluir firma del docente
+     </label>`
+  );
+
+  $('specShowSignature').onchange = e => {
+    specDraft.showSignature = e.target.checked;
+  };
 
   $('openSpecifications').onclick = openSpecifications;
 
