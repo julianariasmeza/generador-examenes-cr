@@ -125,3 +125,51 @@
     display: none !important;
   }
 }
+
+/* Vinculacion y comparacion */
+
+.spec-link-panel {
+  border-top: 1px solid #64748b;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+}
+
+.spec-link-table,
+.spec-compare-table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+  font-size: .85rem;
+}
+
+.spec-link-table th,
+.spec-link-table td,
+.spec-compare-table th,
+.spec-compare-table td {
+  border: 1px solid #64748b;
+  padding: .65rem;
+}
+
+.spec-link-table th,
+.spec-compare-table th {
+  background: rgba(100,116,139,.15);
+}
+
+.spec-link-table select {
+  width: 100%;
+  min-width: 220px;
+}
+
+.spec-compare-table td:not(:first-child) {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+#specComparisonStatus {
+  padding: .75rem 0;
+  font-weight: 600;
+}
+
+#specLinkMessage {
+  font-size: .85rem;
+}

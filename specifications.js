@@ -70,7 +70,7 @@ const STEMSpecifications = (() => {
       regional: String(data.regional || ''),
       preliminaryPoints: number(data.preliminaryPoints),
       paper: data.paper || 'Carta',
-      hideUnusedTypes: data.hideUnusedTypes !== false,
+      hideUnusedTypes: data.hideUnusedTypes === true,
       rows: Array.isArray(data.rows)
         ? data.rows.map(createRow)
         : []

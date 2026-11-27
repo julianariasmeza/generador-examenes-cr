@@ -30,12 +30,16 @@ function openSpecifications() {
     }
   );
 
+  specDraftLinks = {...specificationLinks()};
+
   $('specRegional').value = specDraft.regional;
   $('specPreliminary').value = specDraft.preliminaryPoints;
   $('specPaper').value = specDraft.paper;
   $('specHideUnused').checked = specDraft.hideUnusedTypes;
 
   renderSpecifications();
+
+  renderSpecificationLinks();
 
   $('specDialog').showModal();
 }
@@ -102,6 +106,8 @@ function renderSpecifications() {
   `).join('');
 
   updateSpecifications();
+
+  renderSpecificationLinks();
 }
 
 function updateSpecifications() {
@@ -174,6 +180,8 @@ function updateSpecifications() {
     messages.length
       ? messages.join(' | ')
       : 'La distribución planificada está completa.';
+
+  renderSpecificationComparison();
 }
 
 function importSpecificationTopics() {
@@ -324,6 +332,8 @@ function initSpecifications() {
     </dialog>
   `);
 
+  initSpecificationLinks();
+
   $('openSpecifications').onclick = openSpecifications;
 
   $('specAdd').onclick = () => {
@@ -381,7 +391,19 @@ function initSpecifications() {
 
     if (!button) return;
 
-    if (!confirm('¿Eliminar este indicador?')) return;
+    const row = specDraft.rows[Number(button.dataset.remove)];
+
+    if (!row) return;
+
+    const linked = Object.values(specDraftLinks)
+      .filter(id => id === row.id).length;
+
+    const message = linked
+      ? 'Este indicador tiene ' + linked +
+        ' apartados vinculados. Se eliminaran sus vinculos. Continuar?'
+      : '¿Eliminar este indicador?';
+
+    if (!confirm(message)) return;
 
     specDraft.rows.splice(
       Number(button.dataset.remove), 1
@@ -397,6 +419,11 @@ function initSpecifications() {
   $('specSave').onclick = () => {
 
     config.specifications = S.create(specDraft);
+
+    config.specificationLinks = cleanSpecificationLinks(
+      config.specifications,
+      specDraftLinks
+    );
 
     $('specDialog').close();
 
