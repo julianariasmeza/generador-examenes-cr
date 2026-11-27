@@ -1,0 +1,362 @@
+/* =====================================================
+   Exam STEM CR 2.8.3
+   Tabla de especificaciones - Tema institucional claro
+   ===================================================== */
+
+@media screen {
+
+  #specDialog {
+    color-scheme: light;
+
+    --bg: #F1F5F9;
+    --panel: #FFFFFF;
+    --ink: #0F172A;
+    --muted: #475569;
+    --line: #CBD5E1;
+    --field: #FFFFFF;
+    --soft: #F1F5F9;
+    --accent: #0F766E;
+    --accent-ink: #FFFFFF;
+    --focus: #0D9488;
+    --ok: #15803D;
+
+    background: #F1F5F9;
+    color: #0F172A;
+    border: 1px solid #CBD5E1;
+    border-radius: 14px;
+  }
+
+  /* Encabezados */
+
+  #specDialog h2 {
+    color: #0F172A;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  #specDialog h3 {
+    color: #0F766E;
+    font-size: 1.05rem;
+    font-weight: 650;
+  }
+
+  #specDialog label {
+    color: #475569;
+  }
+
+  /* Campos editables */
+
+  #specDialog input,
+  #specDialog select,
+  #specDialog textarea {
+    background: #FFFFFF;
+    color: #0F172A;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+  }
+
+  #specDialog input:focus,
+  #specDialog select:focus,
+  #specDialog textarea:focus {
+    border-color: #0D9488;
+    outline-color: #0D9488;
+  }
+
+  #specDialog input[type="checkbox"] {
+    accent-color: #0F766E;
+  }
+
+  /* Tarjetas de indicadores */
+
+  #specDialog .spec-summary {
+    gap: .85rem;
+  }
+
+  #specDialog .spec-metric {
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 2px 6px rgba(15,23,42,.05);
+  }
+
+  #specDialog .spec-metric span {
+    color: #475569;
+    font-weight: 500;
+  }
+
+  #specDialog .spec-metric strong {
+    color: #0F766E;
+    font-size: 1.7rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Contenedores de tablas */
+
+  #specDialog .spec-table-wrap {
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    border-radius: 9px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
+  #specDialog .spec-table,
+  #specDialog .spec-link-table,
+  #specDialog .spec-compare-table {
+    background: #FFFFFF;
+    color: #0F172A;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  /* Encabezados verde petroleo */
+
+  #specDialog .spec-table th,
+  #specDialog .spec-link-table th,
+  #specDialog .spec-compare-table th {
+    background: #0F766E;
+    color: #FFFFFF;
+    border: 1px solid #115E59;
+    padding: .75rem .55rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  /* Celdas */
+
+  #specDialog .spec-table td,
+  #specDialog .spec-link-table td,
+  #specDialog .spec-compare-table td {
+    border: 1px solid #E2E8F0;
+    padding: .55rem;
+    color: #0F172A;
+  }
+
+  /* Filas alternadas */
+
+  #specDialog tbody tr:nth-child(odd) {
+    background: #FFFFFF;
+  }
+
+  #specDialog tbody tr:nth-child(even) {
+    background: #F1F5F9;
+  }
+
+  #specDialog tbody tr:hover {
+    background: #E6FFFA;
+  }
+
+  /* Valores calculados */
+
+  #specDialog .spec-number {
+    color: #0F766E;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Totales */
+
+  #specDialog tfoot td,
+  #specDialog tfoot th {
+    background: #CCFBF1 !important;
+    color: #115E59 !important;
+    border-color: #99F6E4;
+    font-weight: 700;
+  }
+
+  /* Validaciones */
+
+  #specDialog .spec-validation {
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    border-radius: 9px;
+    padding: .85rem 1rem;
+  }
+
+  #specDialog .spec-ok {
+    color: #15803D;
+    font-weight: 600;
+  }
+
+  #specDialog .spec-warning {
+    color: #92400E;
+    font-weight: 600;
+  }
+
+  /* Vinculacion y comparacion */
+
+  #specDialog .spec-link-panel {
+    border-top: 1px solid #CBD5E1;
+  }
+
+  /* Botones */
+
+  #specDialog button {
+    background: #FFFFFF;
+    color: #334155;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+
+  #specDialog button:hover {
+    background: #F0FDFA;
+    border-color: #0F766E;
+    color: #0F766E;
+  }
+
+  #specDialog button.primary,
+  #specDialog #specAdd {
+    background: #0F766E;
+    border-color: #0F766E;
+    color: #FFFFFF;
+  }
+
+  #specDialog button.primary:hover,
+  #specDialog #specAdd:hover {
+    background: #115E59;
+    color: #FFFFFF;
+  }
+
+  #specDialog .dialog-actions {
+    border-top: 1px solid #CBD5E1;
+    padding-top: 1rem;
+  }
+
+}
+
+/* Adaptacion a celulares */
+
+@media screen and (max-width: 600px) {
+
+  #specDialog {
+    width: 96vw;
+    max-width: 96vw;
+  }
+
+  #specDialog .spec-metric {
+    padding: .75rem;
+  }
+
+  #specDialog .spec-metric strong {
+    font-size: 1.4rem;
+  }
+
+  #specDialog .spec-actions button {
+    flex: 1 1 auto;
+    min-height: 44px;
+  }
+
+}
+
+/* Acabado institucional */
+
+@media screen {
+
+  #specDialog #specTitle {
+    background: #0F172A;
+    color: #FFFFFF;
+    padding: 1.2rem 1.4rem;
+    border-radius: 10px 10px 0 0;
+    margin-bottom: 0;
+  }
+
+  #specDialog #specTitle + .hint {
+    background: #0F172A;
+    color: #94A3B8;
+    padding: 0 1.4rem 1.2rem;
+    margin-top: 0;
+    border-radius: 0 0 10px 10px;
+  }
+
+  #specDialog .spec-settings {
+    background: #FFFFFF;
+    padding: 1rem;
+    border: 1px solid #CBD5E1;
+    border-radius: 10px;
+  }
+
+  #specDialog .spec-table-wrap {
+    max-height: 55vh;
+    overflow: auto;
+    scrollbar-color: #94A3B8 #F1F5F9;
+  }
+
+  #specDialog .spec-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: #0F766E;
+    color: #FFFFFF;
+  }
+
+  #specDialog .spec-table tbody input,
+  #specDialog .spec-table tbody textarea {
+    background: #FFFFFF;
+    border-color: #CBD5E1;
+  }
+
+  #specDialog .spec-table tbody .spec-number {
+    background: #E2E8F0;
+    color: #334155;
+    font-weight: 650;
+  }
+
+  #specDialog .spec-table tbody .spec-ok {
+    background: #DCFCE7;
+    color: #166534;
+  }
+
+  #specDialog .spec-table tbody .spec-warning {
+    background: #FEE2E2;
+    color: #991B1B;
+  }
+
+  #specDialog #specTotals th {
+    background: #CCFBF1 !important;
+    color: #115E59 !important;
+    border-color: #99F6E4;
+  }
+
+  #specDialog #specValidation.spec-ok {
+    background: #DCFCE7;
+    border-color: #86EFAC;
+    color: #166534;
+  }
+
+  #specDialog #specValidation.spec-warning {
+    background: #FEF2F2;
+    border-color: #FECACA;
+    color: #991B1B;
+  }
+
+  #specDialog .dialog-actions {
+    flex-wrap: wrap;
+    background: #F1F5F9;
+  }
+
+}
+
+@media screen and (max-width: 600px) {
+
+  #specDialog .spec-table-wrap {
+    max-height: 50dvh;
+  }
+
+  #specDialog #specTitle {
+    font-size: 1.15rem;
+    padding: 1rem;
+  }
+
+  #specDialog #specTitle + .hint {
+    padding: 0 1rem 1rem;
+  }
+
+  #specDialog .dialog-actions button {
+    flex: 1 1 auto;
+    min-height: 44px;
+  }
+
+}
