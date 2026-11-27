@@ -38,6 +38,13 @@
       }
     `;
 
+
+    style.textContent += `
+      .ML__menu-toggle > div > menu.ui-menu-container:first-of-type {
+        translate: -220px -60px !important;
+      }
+    `;
+
     root.appendChild(style);
 
     function reposition() {
