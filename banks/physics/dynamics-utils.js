@@ -345,27 +345,76 @@
 
     else if (type === 'pulley') {
 
-      floor(70, 640, 240);
+      const floorY = 240;
 
-      block(210, 130, 180, 110, mass(data.m1));
+      const bx = 210;
+      const bw = 180;
+      const bh = 110;
+      const by = floorY - bh;
 
-      circle(640, 140, 45);
+      const ropeY = by + bh/2;
 
-      line(390, 95, 640, 95);
-      line(685, 140, 685, 330);
+      const radius = 45;
+      const px = 640;
+      const py = ropeY + radius;
 
+      const hangingX = px + radius;
+      const hangingY = 330;
+      const hangingW = 150;
+      const hangingH = 100;
+
+      // Superficie horizontal.
+      floor(70, px - 20, floorY);
+
+      // Soporte de la polea.
+      line(px - 35, floorY, px, py,
+           '#475569', 7);
+
+      // Bloque horizontal.
+      block(bx, by, bw, bh, mass(data.m1));
+
+      // Polea.
+      circle(px, py, radius);
+
+      // Cuerda continua y tangente a la polea.
       ctx.beginPath();
-      ctx.arc(640, 140, 45, -Math.PI/2, 0);
+      ctx.moveTo(bx + bw, ropeY);
+      ctx.lineTo(px, ropeY);
+
+      ctx.arc(
+        px, py, radius,
+        -Math.PI/2, 0
+      );
+
+      ctx.lineTo(hangingX, hangingY);
 
       ctx.strokeStyle = '#334155';
       ctx.lineWidth = 4;
+      ctx.lineJoin = 'round';
       ctx.stroke();
 
-      line(390, 95, 390, 185);
+      // Eje central.
+      ctx.beginPath();
+      ctx.arc(px, py, 6, 0, 2*Math.PI);
+      ctx.fillStyle = '#475569';
+      ctx.fill();
 
-      block(610, 330, 150, 100, mass(data.m2));
+      // Masa suspendida.
+      block(
+        hangingX - hangingW/2,
+        hangingY,
+        hangingW,
+        hangingH,
+        mass(data.m2)
+      );
 
-      friction(data.mu);
+      // Coeficiente de friccion.
+      if (data.mu !== undefined) {
+        text(
+          'μₖ = ' + fmt(data.mu),
+          450, 455
+        );
+      }
 
     }
 

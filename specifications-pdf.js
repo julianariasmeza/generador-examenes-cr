@@ -1,6 +1,6 @@
 'use strict';
 
-/* Exam STEM CR 2.8.4.2
+/* Exam STEM CR 2.8.4.3
    Documento institucional de especificaciones */
 
 function buildSpecificationsPrintHTML() {
