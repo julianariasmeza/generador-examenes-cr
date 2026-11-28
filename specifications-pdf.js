@@ -1,6 +1,6 @@
 'use strict';
 
-/* Exam STEM CR 2.8.4
+/* Exam STEM CR 2.8.4.1
    Documento institucional de especificaciones */
 
 function buildSpecificationsPrintHTML() {
@@ -105,6 +105,12 @@ function buildSpecificationsPrintHTML() {
 
   const columns = 6 + visibleTypes.length;
 
+  const itemWidth = 4;
+  const textWidth = 78 - itemWidth * visibleTypes.length;
+
+  const learningWidth = textWidth * 22 / 46;
+  const indicatorWidth = textWidth * 24 / 46;
+
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -179,7 +185,7 @@ body {
 
 .field {
   display: grid;
-  grid-template-columns: 43% 57%;
+  grid-template-columns: 43% minmax(0, 1fr);
   align-items: baseline;
   gap: 4px;
   margin-bottom: 3px;
@@ -220,6 +226,8 @@ th {
   text-align: center;
   font-weight: 700;
   word-break: normal;
+  padding-left: 2px;
+  padding-right: 2px;
 }
 
 thead tr:last-child th {
@@ -234,6 +242,11 @@ tbody tr:nth-child(even) td {
 .center {
   text-align: center;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  padding-left: 1px;
+  padding-right: 1px;
 }
 
 .points {
@@ -241,6 +254,9 @@ tbody tr:nth-child(even) td {
 }
 
 .total td {
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: keep-all;
   background: #1F3864 !important;
   color: white;
   font-weight: 700;
@@ -414,13 +430,13 @@ ${validation.valid ? '' : `
 
   <colgroup>
     <col style="width:4%">
-    <col style="width:${visibleTypes.length ? 27 : 38}%">
-    <col style="width:${visibleTypes.length ? 29 : 42}%">
+    <col style="width:${learningWidth}%">
+    <col style="width:${indicatorWidth}%">
     <col style="width:5%">
     <col style="width:7%">
-    <col style="width:${visibleTypes.length ? 6 : 4}%">
+    <col style="width:6%">
     ${visibleTypes.map(() =>
-      `<col style="width:${22 / visibleTypes.length}%">`
+      `<col style="width:${itemWidth}%">`
     ).join('')}
   </colgroup>
 
