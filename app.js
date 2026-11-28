@@ -169,6 +169,11 @@ function make(k, p, topic) {
     throw new Error('No existe un banco para este tema.');
   }
   if (k === 'corr') {
+    if (topic === 'Gráficas de movimiento') {
+      throw new Error(
+        'Las preguntas con gráficas todavía no admiten correspondencia automática.'
+      );
+    }
     return window.STEMCorrespondence.create(p, topic, question, shuffle);
   }
   const z = question(topic);
@@ -179,7 +184,10 @@ function make(k, p, topic) {
     space: ['dev','exercise','problem'].includes(k) ? 4 : k === 'restricted' ? 2 : 1, layout: config.layout, marker: config.marker, break: false,
     mode: ['short','id'].includes(k) ? 'Línea' : 'Recuadro', parts: [],
     rubric: ['dev','exercise','problem','restricted'].includes(k) && Number.isInteger(p) && p <= 10 ? [{ label: 'Resuelve correctamente el ejercicio y presenta el procedimiento.', p }] : [],
-    image: ''
+    image: z.image || '',
+    figures: Array.isArray(z.figures)
+      ? z.figures.map(f => ({...f}))
+      : []
   };
 }
 

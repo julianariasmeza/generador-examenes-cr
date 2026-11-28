@@ -14,6 +14,13 @@ function batchQuestionKey(z) {
     ]);
   }
 
+  if (z.graphData) {
+    return JSON.stringify([
+      z.q.trim(),
+      z.graphData
+    ]);
+  }
+
   return z.q.trim();
 }
 
