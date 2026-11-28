@@ -34,7 +34,12 @@ const types = [
 ];
 const topics = {
   'Matemática': ['Ecuaciones lineales', 'Geometría: áreas', 'Funciones lineales'],
-  'Física': ['MRU', 'MRUA', 'Segunda ley de Newton'],
+  'Física': [
+    ...window.STEMPhysicsBank.topics(),
+    'MRU',
+    'MRUA',
+    'Segunda ley de Newton'
+  ],
   'Química': ['Nomenclatura inorgánica', 'Balanceo de ecuaciones', 'Mol y masa molar']
 };
 
@@ -90,6 +95,11 @@ const BALANCE = [
 ];
 
 function question(topic) {
+
+  if (window.STEMPhysicsBank.has(topic)) {
+    return window.STEMPhysicsBank.question(topic);
+  }
+
   const a = rand(2, 12), b = rand(3, 20), x = rand(2, 15);
   let q, r, s, wrong, extra = null;
   switch (topic) {
