@@ -35,8 +35,7 @@ const types = [
 const topics = {
   'Matemática': ['Ecuaciones lineales', 'Geometría: áreas', 'Funciones lineales'],
   'Física': [
-    ...window.STEMPhysicsBank.topics(),
-    'Segunda ley de Newton'
+    ...window.STEMPhysicsBank.topics()
   ],
   'Química': ['Nomenclatura inorgánica', 'Balanceo de ecuaciones', 'Mol y masa molar']
 };
@@ -169,21 +168,56 @@ function make(k, p, topic) {
     throw new Error('No existe un banco para este tema.');
   }
   if (k === 'corr') {
-    if (topic === 'Gráficas de movimiento') {
+    if (
+      topic === 'Gráficas de movimiento' ||
+      (
+        window.STEMDynamicsRubrics.has(topic) &&
+        topic !== 'Masa y peso'
+      )
+    ) {
       throw new Error(
-        'Las preguntas con gráficas todavía no admiten correspondencia automática.'
+        'Este tema todavía no admite correspondencia automática con figuras.'
       );
     }
     return window.STEMCorrespondence.create(p, topic, question, shuffle);
   }
   const z = question(topic);
+
+  if (
+    ['dev','exercise','problem','restricted'].includes(k) &&
+    window.STEMDynamicsRubrics.has(topic)
+  ) {
+
+    if (topic === 'Leyes de Newton') {
+      z.q += ' Justifique su respuesta.';
+    } else if (
+      z.dynamicsData &&
+      Number(p) >= 2
+    ) {
+      z.q += ' Represente el diagrama de cuerpo libre y muestre el procedimiento.';
+    } else {
+      z.q += ' Muestre el procedimiento correspondiente.';
+    }
+
+  }
+
   const n = Number(config.alternatives || 3);
   const options = shuffle([z.r, ...z.options.filter(o => o !== z.r).slice(0, n - 1)]);
   return {
     ...z, k, p, topic, options,
     space: ['dev','exercise','problem'].includes(k) ? 4 : k === 'restricted' ? 2 : 1, layout: config.layout, marker: config.marker, break: false,
     mode: ['short','id'].includes(k) ? 'Línea' : 'Recuadro', parts: [],
-    rubric: ['dev','exercise','problem','restricted'].includes(k) && Number.isInteger(p) && p <= 10 ? [{ label: 'Resuelve correctamente el ejercicio y presenta el procedimiento.', p }] : [],
+    rubric: ['dev','exercise','problem','restricted'].includes(k) &&
+      Number.isInteger(p) && p > 0 && p <= 10
+      ? (
+          window.STEMDynamicsRubrics.has(topic)
+            ? window.STEMDynamicsRubrics.create(topic, p, z)
+            : [{
+                label: 'Resuelve correctamente el ejercicio y presenta el procedimiento.',
+                p
+              }]
+        )
+      : [],
     image: z.image || '',
     figures: Array.isArray(z.figures)
       ? z.figures.map(f => ({...f}))

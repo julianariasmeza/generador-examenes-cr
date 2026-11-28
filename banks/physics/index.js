@@ -35,7 +35,7 @@ window.STEMPhysicsBank = (() => {
       q,
       r: String(r),
       s,
-      options: shuffle(options).slice(0, 4)
+      options: shuffle([String(r), ...shuffle(options.filter(o => o !== String(r))).slice(0, 3)])
     };
   }
 
@@ -58,7 +58,7 @@ window.STEMPhysicsBank = (() => {
   return {
     rand, pick, fmt, shuffle, item,
     register, has, question,
-    topics: () => [...generators.keys()]
+    generator: topic => generators.get(topic), topics: () => [...generators.keys()]
   };
 
 })();
