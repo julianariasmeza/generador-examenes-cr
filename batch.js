@@ -5,6 +5,30 @@
 
 function batchQuestionKey(z) {
 
+  if (
+    z.k !== 'corr' &&
+    (
+      window.STEMGravitationRubrics?.has(z.topic) ||
+      window.STEMEnergyRubrics?.has(z.topic)
+    )
+  ) {
+
+    const statement = String(z.q || '')
+      .replace(
+        /\\s*(Justifique su respuesta\\.|Muestre el procedimiento correspondiente\\.)\\s*$/i,
+        ''
+      )
+      .replace(/\\s+/g,' ')
+      .trim();
+
+    return JSON.stringify([
+      z.topic,
+      statement
+    ]);
+
+  }
+
+
   if (z.k === 'corr') {
     return JSON.stringify([
       [...z.parts].sort(),

@@ -170,13 +170,15 @@ function make(k, p, topic) {
   if (k === 'corr') {
     if (
       topic === 'Gráficas de movimiento' ||
+      window.STEMGravitationRubrics.has(topic) ||
+      window.STEMEnergyRubrics.has(topic) ||
       (
         window.STEMDynamicsRubrics.has(topic) &&
         topic !== 'Masa y peso'
       )
     ) {
       throw new Error(
-        'Este tema todavía no admite correspondencia automática con figuras.'
+        'Este tema todavía no admite correspondencia automática.'
       );
     }
     return window.STEMCorrespondence.create(p, topic, question, shuffle);
@@ -201,6 +203,33 @@ function make(k, p, topic) {
 
   }
 
+  if (
+    ['dev','exercise','problem','restricted'].includes(k) &&
+    window.STEMGravitationRubrics.has(topic)
+  ) {
+
+    const conceptual =
+      topic === 'Fuerzas fundamentales' ||
+      /cuál experimenta mayor/i.test(z.q) ||
+      /fuerza que ejerce el satélite sobre el planeta/i.test(z.q);
+
+    z.q += conceptual
+      ? ' Justifique su respuesta.'
+      : ' Muestre el procedimiento correspondiente.';
+
+  }
+
+  if (
+    ['dev','exercise','problem','restricted'].includes(k) &&
+    window.STEMEnergyRubrics.has(topic)
+  ) {
+
+    z.q += window.STEMEnergyRubrics.conceptual(z)
+      ? ' Justifique su respuesta.'
+      : ' Muestre el procedimiento correspondiente.';
+
+  }
+
   const n = Number(config.alternatives || 3);
   const options = shuffle([z.r, ...z.options.filter(o => o !== z.r).slice(0, n - 1)]);
   return {
@@ -212,7 +241,11 @@ function make(k, p, topic) {
       ? (
           window.STEMDynamicsRubrics.has(topic)
             ? window.STEMDynamicsRubrics.create(topic, p, z)
-            : [{
+            : window.STEMGravitationRubrics.has(topic)
+              ? window.STEMGravitationRubrics.create(topic, p, z)
+              : window.STEMEnergyRubrics.has(topic)
+                ? window.STEMEnergyRubrics.create(topic, p, z)
+                : [{
                 label: 'Resuelve correctamente el ejercicio y presenta el procedimiento.',
                 p
               }]
@@ -420,6 +453,8 @@ function edit(i) {
   $('e_image').value = '';
   openFigureManager(z);
   $('e_remove').checked = false;
+  window.STEMGravitationEditor?.prepare(z);
+  window.STEMEnergyEditor?.prepare(z);
   $('dialog').showModal();
 }
 
@@ -473,6 +508,8 @@ $('editForm').onsubmit = async e => {
   // Compatibilidad con los editores anteriores.
   z.image = z.figures[0]?.src || '';
 
+  window.STEMGravitationEditor?.save(z);
+  window.STEMEnergyEditor?.save(z);
   items[i] = z;
   $('dialog').close();
   render();
