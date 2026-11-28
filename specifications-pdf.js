@@ -1,6 +1,6 @@
 'use strict';
 
-/* Exam STEM CR 2.8.2-D2
+/* Exam STEM CR 2.8.4
    Documento institucional de especificaciones */
 
 function buildSpecificationsPrintHTML() {
@@ -36,12 +36,17 @@ function buildSpecificationsPrintHTML() {
 
   const number = n => fmt(n);
 
+  const itemNumber = n =>
+    Number(n) === 0 ? '–' : number(n);
+
   const decimal = n =>
     Number(n).toFixed(2).replace('.', ',');
 
   const field = (label, value) =>
-    `<div><strong>${esc(label)}:</strong>
-    ${esc(value ?? '')}</div>`;
+    `<div class="field">
+      <strong>${esc(label)}</strong>
+      <span>${esc(value ?? '')}</span>
+    </div>`;
 
   const logo = config.document?.logo || '';
 
@@ -49,19 +54,44 @@ function buildSpecificationsPrintHTML() {
     /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/
       .test(logo);
 
+  const learningSpans = result.rows.map((r, i) => {
+    const learning = String(r.learning || '').trim();
+
+    if (!learning) return 1;
+
+    if (i > 0 &&
+        String(result.rows[i - 1].learning || '').trim() === learning) {
+      return 0;
+    }
+
+    let span = 1;
+
+    while (
+      result.rows[i + span] &&
+      String(result.rows[i + span].learning || '').trim() === learning
+    ) {
+      span++;
+    }
+
+    return span;
+  });
+
   const rows = result.rows.map((r, i) => `
     <tr>
       <td class="center">${i + 1}</td>
-      <td>${esc(r.topic)}</td>
-      <td>${esc(r.learning)}</td>
+      ${learningSpans[i] ? `
+        <td class="learning" rowspan="${learningSpans[i]}">
+          ${esc(r.learning)}
+        </td>
+      ` : ''}
       <td>${esc(r.indicator)}</td>
       <td class="center">${number(r.lessons)}</td>
       <td class="center">${decimal(r.partialPoints)}</td>
-      <td class="center">${number(r.finalPoints)}</td>
+      <td class="center points">${number(r.finalPoints)}</td>
 
       ${visibleTypes.map(t => `
         <td class="center">
-          ${number(r.distribution[t.key])}
+          ${itemNumber(r.distribution[t.key])}
         </td>
       `).join('')}
 
@@ -73,7 +103,7 @@ function buildSpecificationsPrintHTML() {
          r.overridePoints !== r.recommendedPoints
   );
 
-  const columns = 7 + visibleTypes.length;
+  const columns = 6 + visibleTypes.length;
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -98,9 +128,9 @@ function buildSpecificationsPrintHTML() {
 }
 
 body {
-  font-family: Arial, sans-serif;
-  font-size: 10pt;
-  line-height: 1.35;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 9pt;
+  line-height: 1.25;
   color: #111827;
   background: white;
   margin: 0;
@@ -112,59 +142,93 @@ body {
 }
 
 .institution {
+  position: relative;
   text-align: center;
-  margin-bottom: 12px;
+  background: #1F3864;
+  color: white;
+  padding: 9px 12px;
+  margin-bottom: 10px;
 }
 
 .institution img {
-  max-width: 65px;
-  max-height: 65px;
+  max-width: 45px;
+  max-height: 45px;
   object-fit: contain;
-  margin-bottom: 5px;
-}
-
-.institution h1 {
-  font-size: 15pt;
-  margin: 10px 0;
+  margin-bottom: 4px;
 }
 
 .institution p {
-  margin: 3px 0;
+  font-size: 12pt;
+  margin: 0 0 6px;
+}
+
+.institution h1 {
+  font-size: 12pt;
+  margin: 0;
 }
 
 .metadata {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  margin-bottom: 15px;
+  gap: 25px;
+  padding: 0 8px;
+  margin-bottom: 12px;
   font-size: 9pt;
+  break-inside: avoid;
 }
 
-.metadata div div {
-  margin-bottom: 4px;
+.field {
+  display: grid;
+  grid-template-columns: 43% 57%;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 3px;
+}
+
+.field strong {
+  font-weight: 700;
+}
+
+.field span {
+  min-height: 15px;
+  border-bottom: 1px solid #B8C4D6;
+  padding: 1px 3px;
+  overflow-wrap: anywhere;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: 8pt;
+  font-size: 8.5pt;
 }
 
 th, td {
-  border: 1px solid #64748b;
-  padding: 5px 4px;
+  border: 0.7px solid #B8C4D6;
+  padding: 6px 4px;
   vertical-align: middle;
-  overflow-wrap: anywhere;
 }
 
 td {
-  white-space: pre-wrap;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
 th {
-  background: #dce6f1;
+  background: #1F3864;
+  color: white;
   text-align: center;
+  font-weight: 700;
+  word-break: normal;
+}
+
+thead tr:last-child th {
+  white-space: nowrap;
+  padding: 4px 1px;
+}
+
+tbody tr:nth-child(even) td {
+  background: #F3F6FB;
 }
 
 .center {
@@ -172,9 +236,15 @@ th {
   font-variant-numeric: tabular-nums;
 }
 
+.points {
+  font-weight: 700;
+}
+
 .total td {
-  background: #dce6f1;
-  font-weight: bold;
+  background: #1F3864 !important;
+  color: white;
+  font-weight: 700;
+  text-align: center;
 }
 
 thead {
@@ -188,25 +258,33 @@ tr {
 
 .notes {
   font-size: 8pt;
-  margin-top: 12px;
+  margin: 9px 5px 0;
 }
 
 .notes p {
-  margin: 5px 0;
+  margin: 4px 0;
+}
+
+.signatures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20%;
+  padding: 0 8%;
+  margin-top: 32px;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .signature {
-  margin: 40px auto 10px;
-  width: 230px;
-  text-align: center;
   border-top: 1px solid #111827;
-  padding-top: 5px;
-  break-inside: avoid;
+  text-align: center;
+  padding-top: 4px;
+  font-size: 8.5pt;
 }
 
 .toolbar {
   padding: 12px;
-  background: #e8eff7;
+  background: #EAF1FB;
   text-align: center;
   margin-bottom: 15px;
 }
@@ -223,6 +301,7 @@ tr {
   padding: 8px;
   margin-bottom: 12px;
   color: #92400e;
+  background: #FFF8E1;
 }
 
 @media screen {
@@ -242,7 +321,12 @@ tr {
 
 @media print {
 
-  .toolbar {
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .toolbar, .warning, .screen-only {
     display: none !important;
   }
 
@@ -257,11 +341,6 @@ tr {
 
   .table-wrap {
     overflow: visible;
-  }
-
-  th, .total td {
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
   }
 }
 
@@ -290,9 +369,6 @@ tr {
 
   <p><strong>MINISTERIO DE EDUCACIÓN PÚBLICA</strong></p>
 
-  <p>Dirección Regional de Educación:
-    ${esc(spec.regional)}</p>
-
   <h1>TABLA DE ESPECIFICACIONES</h1>
 
 </header>
@@ -302,12 +378,13 @@ tr {
   <div>
 
     ${field('Centro educativo', config.school)}
+    ${field('Dirección Regional', spec.regional)}
     ${field('Docente', config.teacher)}
     ${field('Asignatura', config.subject)}
     ${field('Nivel', config.level)}
     ${field('Período', config.period)}
-    ${field('Fecha', config.date)}
     ${field('Prueba', config.test)}
+    ${field('Fecha', config.date)}
 
   </div>
 
@@ -336,15 +413,14 @@ ${validation.valid ? '' : `
 <table id="specificationPrintTable">
 
   <colgroup>
-    <col style="width:3%">
-    <col style="width:12%">
-    <col style="width:20%">
-    <col style="width:24%">
+    <col style="width:4%">
+    <col style="width:${visibleTypes.length ? 27 : 38}%">
+    <col style="width:${visibleTypes.length ? 29 : 42}%">
     <col style="width:5%">
-    <col style="width:6%">
-    <col style="width:6%">
+    <col style="width:7%">
+    <col style="width:${visibleTypes.length ? 6 : 4}%">
     ${visibleTypes.map(() =>
-      `<col style="width:${24 / visibleTypes.length}%">`
+      `<col style="width:${22 / visibleTypes.length}%">`
     ).join('')}
   </colgroup>
 
@@ -353,11 +429,10 @@ ${validation.valid ? '' : `
     <tr>
 
       <th rowspan="${visibleTypes.length ? 2 : 1}">N.º</th>
-      <th rowspan="${visibleTypes.length ? 2 : 1}">Tema</th>
       <th rowspan="${visibleTypes.length ? 2 : 1}">Aprendizaje</th>
       <th rowspan="${visibleTypes.length ? 2 : 1}">Indicador</th>
-      <th rowspan="${visibleTypes.length ? 2 : 1}">Lecciones</th>
-      <th rowspan="${visibleTypes.length ? 2 : 1}">Pts. parcial</th>
+      <th rowspan="${visibleTypes.length ? 2 : 1}">Lecc.</th>
+      <th rowspan="${visibleTypes.length ? 2 : 1}">Pts.<br>parciales</th>
       <th rowspan="${visibleTypes.length ? 2 : 1}">Puntos</th>
 
       ${visibleTypes.length ? `
@@ -390,7 +465,7 @@ ${validation.valid ? '' : `
 
     <tr class="total">
 
-      <td colspan="4">TOTAL</td>
+      <td colspan="3">TOTAL</td>
 
       <td class="center">
         ${number(result.totalLessons)}
@@ -408,7 +483,7 @@ ${validation.valid ? '' : `
 
       ${visibleTypes.map(t => `
         <td class="center">
-          ${number(result.distribution[t.key])}
+          ${itemNumber(result.distribution[t.key])}
         </td>
       `).join('')}
 
@@ -422,10 +497,22 @@ ${validation.valid ? '' : `
 
 <section class="notes">
 
+  <p><strong>Nota:</strong>
+    Pts. parciales = lecciones × constante.
+    Su suma puede diferir de la puntuación por el redondeo.
+    Los puntos se distribuyen en enteros hasta sumar
+    la puntuación definitiva.
+  </p>
+
   <p><strong>Simbología:</strong>
-    ${visibleTypes.map(t =>
-      esc(t.code + ': ' + t.name)
-    ).join(' · ')}
+    SR: Selección de respuesta ·
+    CO: Correspondencia ·
+    ID: Identificación ·
+    RC: Respuesta corta ·
+    RR: Respuesta restringida ·
+    RE: Respuesta extensa ·
+    RP: Resolución de problemas ·
+    DE: Desarrollo.
   </p>
 
   ${adjustments.length ? `
@@ -442,14 +529,19 @@ ${validation.valid ? '' : `
   ` : ''}
 
   ${validation.warnings.map(w =>
-    `<p>${esc(w)}</p>`
+    `<p class="screen-only">${esc(w)}</p>`
   ).join('')}
 
 </section>
 
 ${spec.showSignature !== false ? `
-  <div class="signature">
-    Firma del docente
+  <div class="signatures">
+    <div class="signature">
+      Firma del docente
+    </div>
+    <div class="signature">
+      V.º B.º Coordinación / Dirección
+    </div>
   </div>
 ` : ''}
 

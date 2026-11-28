@@ -97,12 +97,12 @@ async function test(name, engine) {
 
     console.log(name + ' | Calculos: OK');
 
-    assert.equal(sheet.getCell('H14').result, 46);
-    assert.equal(sheet.getCell('H15').result, 2);
+    assert.equal(sheet.getCell('H16').result, 46);
+    assert.equal(sheet.getCell('H17').result, 2);
 
     assert.equal(
-      sheet.getCell('H15').formula,
-      'IF(ISNUMBER(G15),G15,F15)'
+      sheet.getCell('H17').formula,
+      'IF(ISNUMBER(G17),G17,F17)'
     );
 
     console.log(name + ' | Ajustes y formulas: OK');
@@ -113,6 +113,52 @@ async function test(name, engine) {
     );
 
     console.log(name + ' | Impresion horizontal: OK');
+
+
+    assert.equal(sheet.getCell('A14').value, 'N.º');
+    assert.equal(sheet.getCell('A16').value, 1);
+    assert.equal(sheet.getCell('A17').value, 2);
+
+    assert.equal(sheet.getCell('B16').value,
+      'Analizar funciones');
+
+    assert.equal(sheet.getCell('E16').result, 46);
+    assert.equal(sheet.getCell('E17').result, 4);
+    assert.equal(sheet.getCell('E18').result, 50);
+
+    assert.equal(sheet.getCell('I10').result, 48);
+    assert.equal(sheet.getCell('I11').result, 0);
+
+    assert.equal(sheet.getCell('A13').result,
+      'Distribucion completa');
+
+    assert.ok(sheet.getCell('A13').formula);
+
+    assert.equal(
+      sheet.getCell('D16').dataValidation.type,
+      'decimal'
+    );
+
+    assert.equal(
+      sheet.getCell('B16').fill.fgColor.argb,
+      'FFFFF8E1'
+    );
+
+    assert.equal(
+      sheet.getCell('E16').fill.fgColor.argb,
+      'FFEAF1FB'
+    );
+
+    assert.equal(sheet.views[0].ySplit, 15);
+
+    assert.ok(sheet.conditionalFormattings.length >= 2);
+
+    console.log(name + ' | Nuevo diseno institucional: OK');
+    console.log(name + ' | Numeracion automatica: OK');
+    console.log(name + ' | Alerta de distribucion: OK');
+    console.log(name + ' | Validacion numerica: OK');
+    console.log(name + ' | Colores y formato condicional: OK');
+    console.log(name + ' | Encabezados inmovilizados: OK');
 
     const compare = workbook.getWorksheet(
       'Comparación'

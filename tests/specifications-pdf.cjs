@@ -95,7 +95,17 @@ async function test(name, engine) {
 
     assert.equal(
       await preview.locator('.signature').count(),
-      1
+      2
+    );
+
+    assert.match(
+      await preview.locator('.signature').nth(0).innerText(),
+      /Firma del docente/
+    );
+
+    assert.match(
+      await preview.locator('.signature').nth(1).innerText(),
+      /Coordinación \/ Dirección/
     );
 
     console.log(name + ' | Firma: OK');

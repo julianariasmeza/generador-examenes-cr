@@ -64,7 +64,7 @@ async function buildSpecificationsWorkbook() {
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: {argb: navy}
+        fgColor: {argb: 'FF1F3864'}
       };
 
       cell.alignment = {
@@ -106,7 +106,7 @@ async function buildSpecificationsWorkbook() {
       type: 'pattern',
       pattern: 'solid',
       fgColor: {
-        argb: input ? editable : light
+        argb: input ? 'FFFFF8E1' : 'FFEAF1FB'
       }
     };
   }
@@ -120,7 +120,7 @@ async function buildSpecificationsWorkbook() {
   setup(sheet);
 
   sheet.columns = [
-    {width: 25},
+    {width: 7},
     {width: 40},
     {width: 45},
     {width: 12},
@@ -169,7 +169,17 @@ async function buildSpecificationsWorkbook() {
 
   sheet.getCell('A11').value = 'Puntos definitivos';
 
-  const first = 14;
+  sheet.mergeCells('A3:C3');
+  sheet.getCell('A3').value = 'Amarillo: datos editables';
+  style(sheet.getCell('A3'), true);
+
+  sheet.mergeCells('D3:S3');
+  sheet.getCell('D3').value = 'Azul claro: calculo automatico';
+  style(sheet.getCell('D3'));
+
+  sheet.getRow(3).height = 22;
+
+  const first = 16;
   const last = first + result.rows.length - 1;
   const totalRow = last + 1;
 
@@ -198,8 +208,60 @@ async function buildSpecificationsWorkbook() {
     style(sheet.getCell(`B${r}`), r <= 8);
   }
 
-  sheet.getRow(13).values = [
-    'Tema',
+  const extraMetadata = [
+    [4, 'Direccion Regional', spec.regional],
+    [5, 'Periodo', config.period || ''],
+    [6, 'Prueba', config.test || ''],
+    [7, 'Fecha', config.date || ''],
+    [8, 'Valor porcentual', Number(config.weight || 0) / 100],
+    [9, 'Papel', spec.paper],
+    [10, 'Puntos distribuidos', {
+      formula: `SUM(Q${first}:Q${last})`,
+      result: result.assignedPoints
+    }],
+    [11, 'Puntos pendientes', {
+      formula: `SUM(R${first}:R${last})`,
+      result: result.difference
+    }]
+  ];
+
+  for (const [r, label, value] of extraMetadata) {
+
+    sheet.mergeCells(`D${r}:H${r}`);
+    sheet.mergeCells(`I${r}:S${r}`);
+
+    const labelCell = sheet.getCell(`D${r}`);
+    const valueCell = sheet.getCell(`I${r}`);
+
+    labelCell.value = label;
+    labelCell.font = {
+      name: 'Arial',
+      bold: true,
+      size: 10
+    };
+
+    valueCell.value = value;
+    style(valueCell, r <= 9);
+
+    sheet.getRow(r).height = 24;
+  }
+
+  sheet.getCell('I8').numFmt = '0.##%';
+
+  for (let r = 4; r <= 11; r++) {
+
+    sheet.mergeCells(`B${r}:C${r}`);
+
+    sheet.getCell(`A${r}`).alignment = {
+      vertical: 'middle',
+      wrapText: true
+    };
+  }
+
+  sheet.getColumn(1).width = 9;
+
+  sheet.getRow(15).values = [
+    'N.º',
     'Aprendizaje',
     'Indicador',
     'Lecciones',
@@ -213,7 +275,23 @@ async function buildSpecificationsWorkbook() {
     'Justificación'
   ];
 
-  header(sheet.getRow(13));
+  header(sheet.getRow(15));
+
+  sheet.mergeCells('I14:P14');
+  sheet.getCell('I14').value = 'TIPOS DE ITEMS';
+
+  for (const col of [
+    'A','B','C','D','E','F','G','H','Q','R','S'
+  ]) {
+    const value = sheet.getCell(col + '15').value;
+    sheet.getCell(col + '15').value = null;
+    sheet.mergeCells(col + '14:' + col + '15');
+    sheet.getCell(col + '14').value = value;
+  }
+
+  header(sheet.getRow(14));
+  sheet.getRow(14).height = 24;
+  sheet.getRow(15).height = 24;
 
   result.rows.forEach((r, i) => {
 
@@ -221,7 +299,7 @@ async function buildSpecificationsWorkbook() {
 
     sheet.getRow(n).values = [
 
-      r.topic,
+      i + 1,
       r.learning,
       r.indicator,
       r.lessons,
@@ -263,27 +341,72 @@ async function buildSpecificationsWorkbook() {
       const cell = sheet.getCell(n, c);
 
       const input =
-        c <= 4 ||
+        (c >= 2 && c <= 4) ||
         c === 7 ||
         (c >= 9 && c <= 16) ||
         c === 19;
 
       style(cell, input);
 
-      if (c >= 4 && c <= 18) {
+      if (c === 1 || (c >= 4 && c <= 18)) {
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle',
+          wrapText: true
+        };
         cell.numFmt = '0.##';
+      }
+
+      if (c >= 9 && c <= 16) {
+        cell.numFmt = '0.##;-0.##;"–"';
       }
     }
 
     sheet.getCell(`E${n}`).numFmt = '0.00';
 
-    sheet.getRow(n).height = 60;
+    const lines = Math.max(
+      Math.ceil(r.learning.length / 40),
+      Math.ceil(r.indicator.length / 45),
+      Math.ceil(r.adjustmentReason.length / 35),
+      3
+    );
+
+    sheet.getRow(n).height =
+      Math.min(409, Math.max(48, lines * 14));
   });
+
+  const numericValidation = {
+    type: 'decimal',
+    operator: 'greaterThanOrEqual',
+    allowBlank: true,
+    formulae: [0],
+    showErrorMessage: true,
+    errorStyle: 'stop',
+    errorTitle: 'Valor no valido',
+    error: 'Ingrese un numero mayor o igual a cero.'
+  };
+
+  sheet.getCell('B8').dataValidation = numericValidation;
+
+  for (let n = first; n <= last; n++) {
+    for (const col of [
+      'D','G','I','J','K','L','M','N','O','P'
+    ]) {
+      sheet.getCell(`${col}${n}`).dataValidation =
+        numericValidation;
+    }
+  }
 
   sheet.getCell(`A${totalRow}`).value = 'TOTAL';
 
   const sums = {
     D: result.totalLessons,
+    E: result.rows.reduce(
+      (sum, r) => sum + r.partialPoints, 0
+    ),
+    F: result.rows.reduce(
+      (sum, r) => sum + r.recommendedPoints, 0
+    ),
     H: result.finalPoints,
     Q: result.assignedPoints,
     R: result.difference
@@ -302,15 +425,118 @@ async function buildSpecificationsWorkbook() {
     };
   }
 
+  sheet.mergeCells(`A${totalRow}:C${totalRow}`);
+
   header(sheet.getRow(totalRow));
+
+  sheet.getCell(`E${totalRow}`).numFmt = '0.00';
+
+  sheet.mergeCells('A13:S13');
+
+  sheet.getCell('A13').value = {
+    formula:
+      `IF(COUNTIF(R${first}:R${last},"<>0")=0,` +
+      `"Distribucion completa",` +
+      `IF(R${totalRow}>0,` +
+      `"Faltan "&R${totalRow}&" puntos por distribuir",` +
+      `IF(R${totalRow}<0,` +
+      `"Sobran "&ABS(R${totalRow})&" puntos",` +
+      `"Revisar diferencias por indicador")))`,
+    result: result.rows.every(r => r.difference === 0)
+      ? 'Distribucion completa'
+      : result.difference > 0
+        ? 'Faltan ' + result.difference +
+          ' puntos por distribuir'
+        : result.difference < 0
+          ? 'Sobran ' + Math.abs(result.difference) +
+            ' puntos'
+          : 'Revisar diferencias por indicador'
+  };
+
+  style(sheet.getCell('A13'));
+
+  sheet.getCell('A13').font = {
+    name: 'Arial',
+    size: 11,
+    bold: true
+  };
+
+  sheet.getCell('A13').alignment = {
+    horizontal: 'center',
+    vertical: 'middle'
+  };
+
+  sheet.getRow(13).height = 26;
+
+  sheet.addConditionalFormatting({
+    ref: `R${first}:R${last}`,
+    rules: [
+      {
+        type: 'cellIs',
+        operator: 'equal',
+        formulae: [0],
+        style: {
+          fill: {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: {argb: 'FFDCFCE7'}
+          }
+        }
+      },
+      {
+        type: 'cellIs',
+        operator: 'notEqual',
+        formulae: [0],
+        style: {
+          fill: {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: {argb: 'FFFEE2E2'}
+          }
+        }
+      }
+    ]
+  });
+
+  sheet.addConditionalFormatting({
+    ref: 'A13:S13',
+    rules: [
+      {
+        type: 'expression',
+        formulae: [
+          `COUNTIF($R$${first}:$R$${last},"<>0")=0`
+        ],
+        style: {
+          fill: {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: {argb: 'FFDCFCE7'}
+          }
+        }
+      },
+      {
+        type: 'expression',
+        formulae: [
+          `COUNTIF($R$${first}:$R$${last},"<>0")>0`
+        ],
+        style: {
+          fill: {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: {argb: 'FFFFE8C2'}
+          }
+        }
+      }
+    ]
+  });
 
   sheet.views = [{
     state: 'frozen',
     xSplit: 3,
-    ySplit: 13
+    ySplit: 15
   }];
 
-  sheet.pageSetup.printTitlesRow = '13:13';
+  sheet.pageSetup.printTitlesRow = '14:15';
 
   if (spec.hideUnusedTypes) {
 
@@ -331,7 +557,26 @@ async function buildSpecificationsWorkbook() {
   );
 
   sheet.getCell(`A${totalRow + 2}`).value =
-    'Amarillo: editable. Azul claro: calculado.';
+    'Nota: los puntos parciales se calculan multiplicando las lecciones por la constante.';
+
+  sheet.mergeCells(
+    `A${totalRow + 3}:S${totalRow + 3}`
+  );
+
+  sheet.getCell(`A${totalRow + 3}`).value =
+    'Simbologia: ' +
+    S.TYPES.map(t => t.code + ': ' + t.name).join(' | ');
+
+  for (const offset of [2, 3]) {
+    const cell = sheet.getCell(`A${totalRow + offset}`);
+    cell.font = {name: 'Arial', size: 10};
+    cell.alignment = {
+      wrapText: true,
+      vertical: 'middle'
+    };
+    sheet.getRow(totalRow + offset).height =
+      offset === 3 ? 32 : 24;
+  }
 
   sheet.mergeCells(
     `A${totalRow + 5}:S${totalRow + 5}`
@@ -339,7 +584,9 @@ async function buildSpecificationsWorkbook() {
 
   sheet.getCell(`A${totalRow + 5}`).value =
     spec.showSignature
-      ? '______________________________  Firma del docente'
+      ? '______________________________  Firma del docente' +
+        '                         ' +
+        '______________________________  V.º B.º Coordinacion / Direccion'
       : '';
 
   sheet.pageSetup.printArea =
