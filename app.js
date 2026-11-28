@@ -36,8 +36,6 @@ const topics = {
   'Matemática': ['Ecuaciones lineales', 'Geometría: áreas', 'Funciones lineales'],
   'Física': [
     ...window.STEMPhysicsBank.topics(),
-    'MRU',
-    'MRUA',
     'Segunda ley de Newton'
   ],
   'Química': ['Nomenclatura inorgánica', 'Balanceo de ecuaciones', 'Mol y masa molar']
